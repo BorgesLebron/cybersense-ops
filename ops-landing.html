@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CyberSense Ops</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0d1117; --surface-1: #161b22; --surface-2: #1c2128;
+    --border: #30363d; --text-primary: #e6edf3; --text-secondary: #8b949e;
+    --text-muted: #484f58; --accent: #4fc3f7; --accent-bg: rgba(79,195,247,0.08);
+    --accent-border: rgba(79,195,247,0.3); --radius: 8px;
+    --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  body { font-family: var(--font-sans); background: var(--bg); color: var(--text-primary); min-height: 100vh; display: flex; flex-direction: column; }
+  header { padding: 20px 32px; border-bottom: 1px solid var(--border); background: var(--surface-1); display: flex; align-items: center; gap: 12px; }
+  .logo-mark { width: 34px; height: 34px; border-radius: 8px; background: #1a1a2e; border: 1px solid var(--accent-border); display: flex; align-items: center; justify-content: center; }
+  .logo-mark span { color: var(--accent); font-size: 14px; font-weight: 700; }
+  .site-name { font-size: 15px; font-weight: 600; }
+  .site-sub  { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  main { flex: 1; padding: 40px 32px; max-width: 900px; }
+  h1 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
+  .subtitle { font-size: 14px; color: var(--text-secondary); margin-bottom: 32px; }
+  .module-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+  .module-card {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px;
+    padding: 20px; text-decoration: none; color: inherit; display: block;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .module-card:hover { border-color: var(--accent-border); background: var(--surface-2); }
+  .module-card.active { border-color: var(--accent-border); }
+  .module-card.inactive { opacity: 0.5; cursor: default; pointer-events: none; }
+  .module-icon { font-size: 22px; color: var(--accent); margin-bottom: 10px; }
+  .module-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .module-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+  .module-badge { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 20px; margin-top: 10px; font-weight: 500; }
+  .badge-live { background: var(--accent-bg); color: var(--accent); border: 1px solid var(--accent-border); }
+  .badge-soon { background: #21262d; color: var(--text-muted); border: 1px solid var(--border); }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo-mark"><span>CS</span></div>
+  <div>
+    <div class="site-name">CyberSense Ops</div>
+    <div class="site-sub">ops.cybersense.solutions</div>
+  </div>
+</header>
+<main>
+  <h1>Operational Platform</h1>
+  <p class="subtitle">Modular AI-assisted workflow tools for CyberSense content production and intelligence operations.</p>
+  <div class="module-grid">
+
+    <a class="module-card active" href="/acquisition-editor/">
+      <div class="module-icon"><i class="ti ti-pencil"></i></div>
+      <div class="module-name">Acquisition Editor</div>
+      <div class="module-desc">Generate structured editorial briefs for up to five articles per daily run. Supports URL sources and research paper uploads.</div>
+      <span class="module-badge badge-live">Live</span>
+    </a>
+
+    <div class="module-card inactive">
+      <div class="module-icon"><i class="ti ti-file-text"></i></div>
+      <div class="module-name">Developmental Editor</div>
+      <div class="module-desc">Expand acquisition briefs into full draft articles with structured narrative, technical depth, and citation management.</div>
+      <span class="module-badge badge-soon">Coming soon</span>
+    </div>
+
+    <div class="module-card inactive">
+      <div class="module-icon"><i class="ti ti-search"></i></div>
+      <div class="module-name">Intelligence Aggregator</div>
+      <div class="module-desc">Monitor and ingest threat intelligence feeds, CVE disclosures, and policy developments into the content pipeline.</div>
+      <span class="module-badge badge-soon">Coming soon</span>
+    </div>
+
+    <div class="module-card inactive">
+      <div class="module-icon"><i class="ti ti-send"></i></div>
+      <div class="module-name">Publication Queue</div>
+      <div class="module-desc">Schedule, preview, and dispatch finished articles to the CyberSense distribution list via SendGrid.</div>
+      <span class="module-badge badge-soon">Coming soon</span>
+    </div>
+
+  </div>
+</main>
+</body>
+</html>
