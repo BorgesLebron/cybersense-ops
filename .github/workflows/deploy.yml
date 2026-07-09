@@ -24,4 +24,4 @@ jobs:
           projectName: cybersense-ops
           directory: .
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-
+          wranglerVersion: '3'
