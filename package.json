@@ -1,0 +1,16 @@
+{
+  "name": "cybersense-ops",
+  "version": "1.0.0",
+  "description": "CyberSense Ops Platform — Acquisition Editor",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
