@@ -3,808 +3,407 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Acquisition Editor — CyberSense Ops</title>
+<title>CyberSense Ops — Operational Platform</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   :root {
-    --bg:        #0d1117;
-    --surface-1: #161b22;
-    --surface-2: #1c2128;
-    --surface-3: #21262d;
-    --border:    #30363d;
-    --border-strong: #484f58;
-    --text-primary:   #e6edf3;
-    --text-secondary: #8b949e;
-    --text-muted:     #484f58;
-    --accent:    #4fc3f7;
-    --accent-bg: rgba(79,195,247,0.08);
-    --accent-border: rgba(79,195,247,0.3);
-    --success:   #3fb950;
-    --success-bg: rgba(63,185,80,0.08);
-    --danger:    #f85149;
-    --danger-bg: rgba(248,81,73,0.08);
-    --brand:     #1a1a2e;
-    --radius:    6px;
-    --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    --font-mono: 'SF Mono', 'Fira Code', monospace;
-    --font-voice: Georgia, 'Times New Roman', serif;
+    --bg:       #0d1117;
+    --s1:       #161b22;
+    --s2:       #1c2128;
+    --s3:       #21262d;
+    --border:   #30363d;
+    --text:     #e6edf3;
+    --muted:    #8b949e;
+    --dim:      #484f58;
+    --accent:   #4fc3f7;
+    --abg:      rgba(79,195,247,0.08);
+    --aborder:  rgba(79,195,247,0.25);
+    --success:  #3fb950;
+    --sbg:      rgba(63,185,80,0.08);
+    --radius:   8px;
+    --font:     -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
 
-  body {
-    font-family: var(--font-sans);
-    background: var(--bg);
-    color: var(--text-primary);
-    min-height: 100vh;
-    display: grid;
-    grid-template-columns: 260px 1fr;
-    grid-template-rows: 100vh;
-    overflow: hidden;
-  }
-
-  /* ── Sidebar ── */
-  .sidebar {
-    background: var(--surface-1);
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  .sidebar-head {
-    padding: 16px;
+  /* ── Header ── */
+  header {
+    padding: 16px 32px;
     border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-shrink: 0;
+    background: var(--s1);
+    display: flex; align-items: center; justify-content: space-between;
   }
-
+  .logo { display: flex; align-items: center; gap: 12px; }
   .logo-mark {
-    width: 32px; height: 32px;
-    border-radius: 8px;
-    background: var(--brand);
-    border: 1px solid var(--accent-border);
+    width: 34px; height: 34px; border-radius: 8px;
+    background: #1a1a2e; border: 1px solid var(--aborder);
     display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
   }
   .logo-mark span { color: var(--accent); font-size: 13px; font-weight: 700; }
+  .logo-text { font-size: 15px; font-weight: 600; }
+  .logo-sub  { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .header-link { font-size: 12px; color: var(--muted); text-decoration: none; display: flex; align-items: center; gap: 5px; }
+  .header-link:hover { color: var(--accent); }
 
-  .pub-name  { font-size: 13px; font-weight: 600; color: var(--text-primary); }
-  .pub-sub   { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
-
-  .queue-label {
-    font-size: 10px; color: var(--text-muted);
-    padding: 14px 16px 6px;
-    letter-spacing: 0.08em; text-transform: uppercase;
-    flex-shrink: 0;
-  }
-
-  .slot-list { flex: 1; overflow-y: auto; }
-
-  .article-slot {
-    padding: 10px 16px;
-    border-bottom: 1px solid var(--border);
-    cursor: pointer;
-    transition: background 0.1s;
-    border-left: 2px solid transparent;
-  }
-  .article-slot:hover  { background: var(--surface-2); }
-  .article-slot.active { background: var(--surface-2); border-left-color: var(--accent); }
-
-  .slot-num   { font-size: 10px; color: var(--text-muted); margin-bottom: 2px; letter-spacing: 0.06em; }
-  .slot-title { font-size: 12px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .slot-status {
-    font-size: 11px; color: var(--text-muted);
-    margin-top: 3px; display: flex; align-items: center; gap: 5px;
-  }
-  .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
-  .article-slot.done  .slot-status { color: var(--success); }
-  .article-slot.running .slot-status { color: var(--accent); }
-  .article-slot.error .slot-status { color: var(--danger); }
-
-  .sidebar-footer {
-    padding: 14px 16px;
-    border-top: 1px solid var(--border);
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .batch-progress { display: none; }
-  .batch-label { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
-  .progress-wrap { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
-  .progress-bar  { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.4s; width: 0%; }
-
-  .btn-run-all {
-    width: 100%; padding: 9px 0;
-    border-radius: var(--radius); border: 1px solid var(--accent-border);
-    background: var(--accent-bg); color: var(--accent);
-    font-size: 13px; font-weight: 500; cursor: pointer;
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-    transition: background 0.15s;
-  }
-  .btn-run-all:hover    { background: rgba(79,195,247,0.14); }
-  .btn-run-all:disabled { opacity: 0.4; cursor: not-allowed; }
+  /* ── Hero ── */
+  .hero { padding: 48px 32px 40px; border-bottom: 1px solid var(--border); }
+  .hero h1 { font-size: 26px; font-weight: 700; margin-bottom: 6px; letter-spacing: -0.5px; }
+  .hero p  { font-size: 14px; color: var(--muted); max-width: 560px; line-height: 1.65; }
 
   /* ── Main ── */
-  .main {
-    display: flex; flex-direction: column; overflow: hidden;
-    background: var(--bg);
+  main { max-width: 1100px; margin: 0 auto; padding: 40px 32px 80px; }
+
+  .section-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--dim);
+    margin-bottom: 16px; padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
   }
 
-  .main-header {
-    padding: 14px 24px;
-    border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: space-between;
-    background: var(--surface-1);
+  /* ── Pipeline ── */
+  .pipeline {
+    display: flex; align-items: flex-start; gap: 0;
+    margin-bottom: 48px; overflow-x: auto; padding-bottom: 4px;
+  }
+
+  .pipeline-stage {
+    display: flex; flex-direction: column; align-items: center;
     flex-shrink: 0;
   }
-  .main-header-left { display: flex; align-items: center; gap: 10px; }
-  .header-title { font-size: 14px; font-weight: 600; }
-  .header-meta  { font-size: 12px; color: var(--text-muted); }
 
-  .nav-crumb {
-    font-size: 11px; color: var(--text-muted);
-    display: flex; align-items: center; gap: 4px;
-  }
-  .nav-crumb span { color: var(--text-secondary); }
-
-  .main-body { flex: 1; overflow-y: auto; padding: 24px; }
-
-  /* ── Cards ── */
-  .card {
-    background: var(--surface-1);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 16px;
-  }
-  .card-title {
-    font-size: 12px; font-weight: 600; color: var(--text-secondary);
-    margin-bottom: 16px; display: flex; align-items: center; gap: 7px;
-    text-transform: uppercase; letter-spacing: 0.06em;
-  }
-  .card-title i { font-size: 15px; color: var(--accent); }
-
-  /* ── Fields ── */
-  .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .field-grid .full { grid-column: 1 / -1; }
-  .field { display: flex; flex-direction: column; gap: 5px; }
-  .field label { font-size: 11px; color: var(--text-muted); letter-spacing: 0.04em; text-transform: uppercase; }
-
-  .field input[type=text],
-  .field input[type=url] {
-    font-size: 13px; padding: 8px 11px;
-    border: 1px solid var(--border); border-radius: var(--radius);
-    background: var(--surface-2); color: var(--text-primary);
-    outline: none; font-family: var(--font-sans);
-    transition: border-color 0.15s;
-  }
-  .field input:focus { border-color: var(--accent); }
-  .field input::placeholder { color: var(--text-muted); }
-
-  /* ── Severity ── */
-  .sev-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 2px; }
-  .sev-btn {
-    font-size: 11px; padding: 4px 11px; border-radius: 20px;
-    border: 1px solid var(--border); background: transparent;
-    color: var(--text-secondary); cursor: pointer; transition: all 0.12s;
-    font-weight: 500;
-  }
-  .sev-btn:hover { border-color: var(--border-strong); color: var(--text-primary); }
-  .sev-btn.sel-CRITICAL     { background: #6a0000; color: #ff8a80; border-color: #ff5252; }
-  .sev-btn.sel-HIGH         { background: #4a1800; color: #ffab40; border-color: #ff6d00; }
-  .sev-btn.sel-MEDIUM       { background: #3d2e00; color: #ffd740; border-color: #ffc400; }
-  .sev-btn.sel-LOW          { background: #003300; color: #69f0ae; border-color: #00c853; }
-  .sev-btn.sel-INFORMATIONAL{ background: var(--accent-bg); color: var(--accent); border-color: var(--accent-border); }
-
-  /* ── Sources ── */
-  .source-list { display: flex; flex-direction: column; gap: 8px; }
-
-  .source-row { display: flex; flex-direction: column; gap: 3px; }
-  .source-row-inputs { display: flex; gap: 6px; align-items: center; }
-
-  .source-row input[type=url] {
-    flex: 1; font-size: 12px; padding: 7px 10px;
-    border: 1px solid var(--border); border-radius: var(--radius);
-    background: var(--surface-2); color: var(--text-primary);
-    outline: none; font-family: var(--font-sans); transition: border-color 0.15s;
-  }
-  .source-row input[type=url]:focus   { border-color: var(--accent); }
-  .source-row input[type=url]::placeholder { color: var(--text-muted); }
-
-  .btn-upload {
-    height: 32px; padding: 0 10px;
-    border: 1px solid var(--border); border-radius: var(--radius);
-    background: var(--surface-2); color: var(--text-secondary);
-    cursor: pointer; display: flex; align-items: center; gap: 5px;
-    font-size: 11px; font-weight: 500; white-space: nowrap;
-    transition: all 0.12s; flex-shrink: 0;
-  }
-  .btn-upload:hover          { border-color: var(--accent); color: var(--accent); }
-  .btn-upload.has-file       { border-color: var(--success); color: var(--success); background: var(--success-bg); }
-  .btn-upload i              { font-size: 13px; }
-
-  .btn-remove-src {
-    width: 28px; height: 32px; border: none; background: transparent;
-    color: var(--text-muted); cursor: pointer; border-radius: var(--radius);
+  .stage-connector {
+    width: 40px; height: 40px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 15px; flex-shrink: 0; transition: all 0.12s;
-  }
-  .btn-remove-src:hover { background: var(--danger-bg); color: var(--danger); }
-
-  .file-badge {
-    font-size: 10px; color: var(--success);
-    display: flex; align-items: center; gap: 4px;
-    padding-left: 2px;
-  }
-  .file-badge i { font-size: 11px; }
-
-  .btn-add-src {
-    font-size: 12px; color: var(--accent); background: transparent;
-    border: none; cursor: pointer; padding: 4px 0; text-align: left;
-    display: flex; align-items: center; gap: 4px; margin-top: 4px;
-    transition: opacity 0.12s;
-  }
-  .btn-add-src:hover { opacity: 0.75; }
-
-  /* ── Generate button ── */
-  .btn-generate {
-    width: 100%; padding: 11px 0; border-radius: var(--radius);
-    border: none; background: var(--accent); color: #0d1117;
-    font-size: 13px; font-weight: 700; cursor: pointer;
-    display: flex; align-items: center; justify-content: center; gap: 7px;
-    transition: opacity 0.15s; margin-top: 4px; letter-spacing: 0.02em;
-  }
-  .btn-generate:hover    { opacity: 0.88; }
-  .btn-generate:disabled { opacity: 0.35; cursor: not-allowed; }
-
-  /* ── Output ── */
-  .output-card {
-    background: var(--surface-1);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 20px;
-    margin-top: 16px;
-  }
-  .output-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 14px;
-  }
-  .output-label {
-    font-size: 11px; color: var(--success); font-weight: 600;
-    display: flex; align-items: center; gap: 6px;
-    text-transform: uppercase; letter-spacing: 0.06em;
-  }
-  .output-label i { font-size: 14px; }
-  .output-text {
-    font-size: 13px; line-height: 1.8;
-    color: var(--text-primary);
-    font-family: var(--font-mono);
-    white-space: pre-wrap; word-break: break-word;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 16px;
-    max-height: 520px;
-    overflow-y: auto;
-  }
-  .output-actions { display: flex; gap: 8px; margin-top: 12px; }
-  .btn-copy, .btn-download {
-    font-size: 12px; padding: 6px 13px;
-    border: 1px solid var(--border); border-radius: var(--radius);
-    background: transparent; color: var(--text-secondary);
-    cursor: pointer; display: flex; align-items: center; gap: 5px;
-    transition: all 0.12s;
-  }
-  .btn-copy:hover, .btn-download:hover {
-    border-color: var(--border-strong); color: var(--text-primary);
+    color: var(--dim); font-size: 18px; flex-shrink: 0;
+    margin-top: 14px;
   }
 
-  /* ── Error ── */
-  .error-card {
-    background: var(--danger-bg);
-    border: 1px solid rgba(248,81,73,0.3);
-    border-radius: 10px; padding: 16px; margin-top: 16px;
-    font-size: 13px; color: var(--danger); line-height: 1.6;
+  .stage-card {
+    width: 140px;
+    background: var(--s1); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px 12px;
+    text-decoration: none; color: inherit;
+    display: flex; flex-direction: column; align-items: center;
+    text-align: center; gap: 8px;
+    transition: border-color 0.15s, background 0.15s, transform 0.15s;
+    cursor: pointer;
+  }
+  .stage-card:hover { border-color: var(--aborder); background: var(--s2); transform: translateY(-2px); }
+  .stage-card.disabled { opacity: 0.4; cursor: default; pointer-events: none; }
+
+  .stage-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: var(--abg); border: 1px solid var(--aborder);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; color: var(--accent);
+  }
+  .stage-icon.shared {
+    background: rgba(63,185,80,0.08);
+    border-color: rgba(63,185,80,0.3);
+    color: var(--success);
   }
 
-  /* ── Spinner ── */
-  .spinner {
-    display: inline-block; width: 13px; height: 13px;
-    border: 2px solid currentColor; border-top-color: transparent;
-    border-radius: 50%; animation: spin 0.7s linear infinite;
+  .stage-name   { font-size: 13px; font-weight: 600; line-height: 1.3; }
+  .stage-role   { font-size: 10px; color: var(--muted); letter-spacing: 0.04em; text-transform: uppercase; }
+  .stage-badge  {
+    font-size: 10px; padding: 2px 8px; border-radius: 20px;
+    font-weight: 600; letter-spacing: 0.04em;
   }
-  @keyframes spin { to { transform: rotate(360deg); } }
+  .badge-live   { background: var(--sbg); color: var(--success); border: 1px solid rgba(63,185,80,0.3); }
+  .badge-soon   { background: var(--s3); color: var(--dim); border: 1px solid var(--border); }
+  .badge-shared { background: rgba(63,185,80,0.08); color: var(--success); border: 1px solid rgba(63,185,80,0.3); }
 
-  /* ── Scrollbar ── */
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
+  .pipeline-break {
+    width: 100%; margin: 8px 0 24px;
+    height: 1px; background: var(--border); position: relative;
+  }
+  .pipeline-break::after {
+    content: 'Daily Brief Pipeline begins here';
+    position: absolute; left: 50%; top: -8px;
+    transform: translateX(-50%);
+    font-size: 10px; color: var(--dim);
+    background: var(--bg); padding: 0 8px;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  /* ── Convention table ── */
+  .convention-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 16px; margin-bottom: 48px;
+  }
+  .convention-card {
+    background: var(--s1); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px 18px;
+  }
+  .convention-title {
+    font-size: 12px; font-weight: 600; color: var(--accent);
+    margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+  }
+  .convention-title i { font-size: 14px; }
+  .convention-row {
+    display: flex; align-items: baseline; gap: 8px;
+    font-size: 12px; padding: 5px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .convention-row:last-child { border-bottom: none; }
+  .convention-key { color: var(--muted); width: 100px; flex-shrink: 0; }
+  .convention-val { color: var(--text); font-family: 'SF Mono', monospace; font-size: 11px; }
+
+  /* ── Repo map ── */
+  .repo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 48px; }
+  .repo-card {
+    background: var(--s1); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px 18px;
+  }
+  .repo-title {
+    font-size: 12px; font-weight: 600; color: var(--text);
+    margin-bottom: 10px; display: flex; align-items: center; gap: 7px;
+  }
+  .repo-title i { color: var(--accent); font-size: 14px; }
+  .repo-url { font-size: 10px; color: var(--muted); font-family: monospace; margin-bottom: 10px; }
+  .repo-tree {
+    font-size: 11px; color: var(--muted);
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    line-height: 1.8; background: var(--s2);
+    border: 1px solid var(--border); border-radius: 6px;
+    padding: 12px 14px;
+  }
+  .tree-dir  { color: var(--accent); }
+  .tree-file { color: var(--text); }
+  .tree-note { color: var(--dim); font-style: italic; }
 </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════
-     SIDEBAR
-════════════════════════════════════════════ -->
-<aside class="sidebar">
-  <div class="sidebar-head">
+<header>
+  <div class="logo">
     <div class="logo-mark"><span>CS</span></div>
     <div>
-      <div class="pub-name">CyberSense Ops</div>
-      <div class="pub-sub">Acquisition Editor</div>
+      <div class="logo-text">CyberSense Ops</div>
+      <div class="logo-sub">ops.cybersense.solutions</div>
     </div>
   </div>
+  <a class="header-link" href="https://cybersense.solutions" target="_blank">
+    <i class="ti ti-external-link"></i> cybersense.solutions
+  </a>
+</header>
 
-  <div class="queue-label">Daily Article Queue</div>
-  <div class="slot-list" id="slot-list"></div>
-
-  <div class="sidebar-footer">
-    <div class="batch-progress" id="batch-progress">
-      <div class="batch-label" id="batch-label">Running batch…</div>
-      <div class="progress-wrap"><div class="progress-bar" id="batch-bar"></div></div>
-    </div>
-    <button class="btn-run-all" id="btn-run-all" onclick="runAll()">
-      <i class="ti ti-player-play"></i> Run all articles
-    </button>
+<div class="hero">
+  <div style="max-width:1100px;margin:0 auto">
+    <h1>Operational Platform</h1>
+    <p>Modular AI-assisted workflow tools for CyberSense content production. Each module is built, proven, and validated independently before integration.</p>
   </div>
-</aside>
+</div>
 
-<!-- ═══════════════════════════════════════════
-     MAIN
-════════════════════════════════════════════ -->
-<main class="main">
-  <div class="main-header">
-    <div class="main-header-left">
-      <div class="nav-crumb">
-        <span>ops.cybersense.solutions</span>
-        <i class="ti ti-chevron-right" style="font-size:12px"></i>
-        <span>Acquisition Editor</span>
-        <i class="ti ti-chevron-right" style="font-size:12px"></i>
-        <span id="crumb-article">Article 1</span>
+<main>
+
+  <!-- ── Intel Brief Pipeline ── -->
+  <div class="section-label">Intel Brief Pipeline — Sequential</div>
+  <div class="pipeline">
+
+    <div class="pipeline-stage">
+      <a class="stage-card" href="/agents/intel-brief/james.html">
+        <div class="stage-icon"><i class="ti ti-pencil"></i></div>
+        <div class="stage-name">James</div>
+        <div class="stage-role">Acquisitions Editor</div>
+        <span class="stage-badge badge-live">Live</span>
+      </a>
+    </div>
+
+    <div class="stage-connector"><i class="ti ti-arrow-right"></i></div>
+
+    <div class="pipeline-stage">
+      <a class="stage-card disabled" href="/agents/intel-brief/jason.html">
+        <div class="stage-icon"><i class="ti ti-file-text"></i></div>
+        <div class="stage-name">Jason</div>
+        <div class="stage-role">Developmental Editor</div>
+        <span class="stage-badge badge-soon">Next</span>
+      </a>
+    </div>
+
+    <div class="stage-connector"><i class="ti ti-arrow-right"></i></div>
+
+    <div class="pipeline-stage">
+      <a class="stage-card disabled" href="/agents/intel-brief/rob.html">
+        <div class="stage-icon"><i class="ti ti-crown"></i></div>
+        <div class="stage-name">Rob</div>
+        <div class="stage-role">Editor in Chief</div>
+        <span class="stage-badge badge-soon">Planned</span>
+      </a>
+    </div>
+
+    <div class="stage-connector"><i class="ti ti-arrow-right"></i></div>
+
+    <div class="pipeline-stage">
+      <a class="stage-card disabled" href="/agents/design/maya.html">
+        <div class="stage-icon shared"><i class="ti ti-photo"></i></div>
+        <div class="stage-name">Maya</div>
+        <div class="stage-role">Graphic Designer</div>
+        <span class="stage-badge badge-shared">Shared</span>
+      </a>
+    </div>
+
+    <div class="stage-connector"><i class="ti ti-arrow-right"></i></div>
+
+    <div class="pipeline-stage">
+      <a class="stage-card disabled" href="/agents/publishing/mary.html">
+        <div class="stage-icon"><i class="ti ti-layout"></i></div>
+        <div class="stage-name">Mary</div>
+        <div class="stage-role">UI Developer</div>
+        <span class="stage-badge badge-soon">Planned</span>
+      </a>
+    </div>
+
+    <div class="stage-connector"><i class="ti ti-arrow-right"></i></div>
+
+    <div class="pipeline-stage">
+      <a class="stage-card disabled" href="/agents/publishing/ethan.html">
+        <div class="stage-icon"><i class="ti ti-upload"></i></div>
+        <div class="stage-name">Ethan</div>
+        <div class="stage-role">Publisher</div>
+        <span class="stage-badge badge-soon">Planned</span>
+      </a>
+    </div>
+
+  </div>
+
+  <!-- ── Daily Brief Pipeline ── -->
+  <div class="section-label">Daily Brief Pipeline — Receives final article from Rob</div>
+  <div class="pipeline">
+
+    <div class="pipeline-stage">
+      <a class="stage-card disabled" href="/agents/daily-brief/ruth.html">
+        <div class="stage-icon"><i class="ti ti-pencil"></i></div>
+        <div class="stage-name">Ruth</div>
+        <div class="stage-role">Acquisitions Editor</div>
+        <span class="stage-badge badge-soon">Planned</span>
+      </a>
+    </div>
+
+    <div class="stage-connector"><i class="ti ti-arrow-right"></i></div>
+
+    <div class="pipeline-stage">
+      <a class="stage-card disabled" href="/agents/daily-brief/peter.html">
+        <div class="stage-icon"><i class="ti ti-file-text"></i></div>
+        <div class="stage-name">Peter</div>
+        <div class="stage-role">Developmental Editor</div>
+        <span class="stage-badge badge-soon">Planned</span>
+      </a>
+    </div>
+
+    <div class="stage-connector"><i class="ti ti-arrow-right"></i></div>
+
+    <div class="pipeline-stage">
+      <a class="stage-card disabled" href="/agents/daily-brief/ed.html">
+        <div class="stage-icon"><i class="ti ti-crown"></i></div>
+        <div class="stage-name">Ed</div>
+        <div class="stage-role">Editor in Chief</div>
+        <span class="stage-badge badge-soon">Planned</span>
+      </a>
+    </div>
+
+    <div class="stage-connector"><i class="ti ti-arrow-right"></i></div>
+
+    <div class="pipeline-stage">
+      <a class="stage-card disabled" href="/agents/publishing/kirby.html">
+        <div class="stage-icon"><i class="ti ti-layout"></i></div>
+        <div class="stage-name">Kirby</div>
+        <div class="stage-role">UI Developer</div>
+        <span class="stage-badge badge-soon">Planned</span>
+      </a>
+    </div>
+
+    <div class="stage-connector"><i class="ti ti-arrow-right"></i></div>
+
+    <div class="pipeline-stage">
+      <a class="stage-card disabled" href="/agents/publishing/lucy.html">
+        <div class="stage-icon"><i class="ti ti-upload"></i></div>
+        <div class="stage-name">Lucy</div>
+        <div class="stage-role">Publisher</div>
+        <span class="stage-badge badge-soon">Planned</span>
+      </a>
+    </div>
+
+  </div>
+
+  <!-- ── Naming Conventions ── -->
+  <div class="section-label">Naming Conventions</div>
+  <div class="convention-grid">
+
+    <div class="convention-card">
+      <div class="convention-title"><i class="ti ti-file-code"></i> Ops Output Files (cybersense-ops)</div>
+      <div class="convention-row"><span class="convention-key">Pattern</span><span class="convention-val">YYYYMMDD_agentname_v#.ext</span></div>
+      <div class="convention-row"><span class="convention-key">Example</span><span class="convention-val">20260710_james_v1.txt</span></div>
+      <div class="convention-row"><span class="convention-key">Example</span><span class="convention-val">20260710_maya_v1.png</span></div>
+      <div class="convention-row"><span class="convention-key">Example</span><span class="convention-val">20260710_mary_v1.html</span></div>
+    </div>
+
+    <div class="convention-card">
+      <div class="convention-title"><i class="ti ti-world"></i> Published Files (cybersense-solutions)</div>
+      <div class="convention-row"><span class="convention-key">Articles</span><span class="convention-val">articles/YYYY/Mon/YYYYMMDD-Slug.html</span></div>
+      <div class="convention-row"><span class="convention-key">Banners</span><span class="convention-val">banners/Slug.png</span></div>
+      <div class="convention-row"><span class="convention-key">Newsletter</span><span class="convention-val">newsletter/YYYY/Mon/MMDDYYYY.html</span></div>
+      <div class="convention-row"><span class="convention-key">Edition</span><span class="convention-val">MMDDYYYY_edition###.html</span></div>
+    </div>
+
+  </div>
+
+  <!-- ── Repo Structure ── -->
+  <div class="section-label">Repository Map</div>
+  <div class="repo-grid">
+
+    <div class="repo-card">
+      <div class="repo-title"><i class="ti ti-tool"></i> cybersense-ops</div>
+      <div class="repo-url">github.com/BorgesLebron/cybersense-ops</div>
+      <div class="repo-tree">
+<span class="tree-dir">cybersense-ops/</span>
+├── index.html          <span class="tree-note">← this page</span>
+├── server.js           <span class="tree-note">← Express proxy</span>
+├── package.json
+├── Dockerfile
+├── railway.toml
+└── <span class="tree-dir">agents/</span>
+    ├── <span class="tree-dir">intel-brief/</span>
+    │   ├── <span class="tree-file">james.html</span>   <span class="tree-note">← live</span>
+    │   ├── <span class="tree-file">jason.html</span>
+    │   └── <span class="tree-file">rob.html</span>
+    ├── <span class="tree-dir">daily-brief/</span>
+    │   ├── <span class="tree-file">ruth.html</span>
+    │   ├── <span class="tree-file">peter.html</span>
+    │   └── <span class="tree-file">ed.html</span>
+    ├── <span class="tree-dir">design/</span>
+    │   └── <span class="tree-file">maya.html</span>
+    └── <span class="tree-dir">publishing/</span>
+        ├── <span class="tree-file">mary.html</span>
+        ├── <span class="tree-file">kirby.html</span>
+        ├── <span class="tree-file">ethan.html</span>
+        └── <span class="tree-file">lucy.html</span>
       </div>
     </div>
-    <span class="header-meta" id="header-date"></span>
+
+    <div class="repo-card">
+      <div class="repo-title"><i class="ti ti-world"></i> cybersense-solutions</div>
+      <div class="repo-url">github.com/BorgesLebron/cybersense-solutions</div>
+      <div class="repo-tree">
+<span class="tree-dir">cybersense-solutions/</span>
+├── index.html
+├── intel.html          <span class="tree-note">← Ethan updates</span>
+├── newsletter.html     <span class="tree-note">← Lucy updates</span>
+├── styles.css
+├── <span class="tree-dir">articles/</span>
+│   └── <span class="tree-dir">YYYY/Mon/</span>
+│       └── <span class="tree-file">YYYYMMDD-Slug.html</span>
+├── <span class="tree-dir">banners/</span>
+│   └── <span class="tree-file">Slug.png</span>
+└── <span class="tree-dir">newsletter/</span>
+    └── <span class="tree-dir">YYYY/Mon/</span>
+        └── <span class="tree-file">MMDDYYYY_edition###.html</span>
+      </div>
+    </div>
+
   </div>
 
-  <div class="main-body" id="main-body"></div>
 </main>
-
-<!-- ═══════════════════════════════════════════
-     JAVASCRIPT
-════════════════════════════════════════════ -->
-<script>
-/* ── Config ─────────────────────────────── */
-// In Cloudflare Pages, inject your API key as an environment variable
-// named ANTHROPIC_API_KEY and replace the string below with the injection
-// syntax your Pages Function uses. For direct browser testing, you can
-// temporarily paste your key here — never commit it to GitHub.
-const SYSTEM_PROMPT = `You are the Acquisitions Editor for CyberSense Detailed Articles, a deep-dive intelligence publication that expands on themes and critical subjects introduced in the Daily Digital Awareness Brief. Your role is to identify, source, and structure content that warrants comprehensive exploration beyond the daily newsletter cycle. You focus on narrative depth, technical precision, contextual breadth, and institutional relevance. Do not generate prose; only provide a structured outline suitable for editorial development.
-
-Your responsibility is to establish the foundational architecture for a detailed article that:
-- Identifies and justifies a single primary subject drawn from recent cybersecurity, policy, or emerging technology domains
-- Develops a coherent thematic structure that serves practitioners, strategists, and institutional decision-makers
-- Provides sufficient sourcing depth to support multi-section analysis
-- Establishes clear connections between the immediate subject matter and workforce awareness, institutional resilience, or strategic decision-making
-- Extracts and catalogues critical technical metadata required for publication readiness
-
-Produce a complete Detailed Article outline that includes:
-
-PRIMARY METADATA FIELDS
-Severity Classification: CRITICAL | HIGH | MEDIUM | LOW | INFORMATIONAL
-Publication Date: Specific date (Month Date, Year format)
-
-ARTICLE STRUCTURE FIELDS
-Primary Article Theme
-Opening Thesis
-Key Finding (boldface-formatted, single high-impact assertion)
-Source Architecture (minimum five credible sources, dated within 90 days)
-What Happened
-Why It Matters
-Operational Implications
-Recommended Actions
-Thematic Connectors
-
-TECHNICAL METADATA FIELDS (include only those relevant to subject matter)
-CVE/ID | CVSS Score | Classification | Announced | Tracked Activity | Attack Vectors | Target Platforms | Target Product | Target Environment | Exposure Window
-
-FINAL OUTLINE STRUCTURE
-Date | Severity | Primary Subject | Key Finding | Source URLs | CVE/ID | CVSS Score | Classification | Announced | Tracked Activity | Attack Vectors | Target Platforms | Target Product | Target Environment | Exposure Window | Audience Segment Breakdown | Strategic Relevance
-
-Use the provided source URLs and any uploaded document content as the Source Architecture. Format the output exactly as the editorial team expects: structured, labeled sections, no prose preamble. Ensure all sourced material is recent (within 90 days of publication), credible, and directly supportive of the primary theme.`;
-
-/* ── State ───────────────────────────────── */
-const STORAGE_KEY = 'cybersense_acq_queue';
-
-function blankSource() {
-  return { url: '', fileName: '', fileData: null, fileType: '', isBase64: false };
-}
-
-function blankArticle(id) {
-  return {
-    id,
-    title: '',
-    date: todayString(),
-    severity: 'INFORMATIONAL',
-    sources: Array.from({ length: 5 }, blankSource),
-    output: null,
-    status: 'idle'
-  };
-}
-
-function todayString() {
-  return new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-}
-
-let articles = loadQueue();
-let activeIdx = 0;
-
-function loadQueue() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      // Strip binary fileData on reload (can't persist base64 in localStorage reliably)
-      parsed.forEach(a => a.sources.forEach(s => {
-        if (s.isBase64) { s.fileData = null; s.fileName = s.fileName ? s.fileName + ' (re-upload needed)' : ''; }
-      }));
-      return parsed;
-    }
-  } catch (e) {}
-  return Array.from({ length: 5 }, (_, i) => blankArticle(i + 1));
-}
-
-function saveQueue() {
-  try {
-    // Save without binary data
-    const safe = articles.map(a => ({
-      ...a,
-      sources: a.sources.map(s => ({ ...s, fileData: null }))
-    }));
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(safe));
-  } catch (e) {}
-}
-
-/* ── Render ──────────────────────────────── */
-function renderSlots() {
-  document.getElementById('slot-list').innerHTML = articles.map((a, i) => `
-    <div class="article-slot ${i === activeIdx ? 'active' : ''} ${a.status}"
-         onclick="selectSlot(${i})">
-      <div class="slot-num">ARTICLE ${i + 1}</div>
-      <div class="slot-title">${esc(a.title) || '<span style="color:var(--text-muted)">Untitled</span>'}</div>
-      <div class="slot-status">
-        <span class="dot"></span>
-        ${{ idle: 'Not started', running: 'Generating…', done: 'Brief ready', error: 'Error' }[a.status] || ''}
-      </div>
-    </div>
-  `).join('');
-}
-
-function renderMain() {
-  const a = articles[activeIdx];
-  document.getElementById('crumb-article').textContent = `Article ${a.id}`;
-  document.getElementById('header-date').textContent = a.date;
-
-  const sourcesHtml = a.sources.map((s, si) => `
-    <div class="source-row">
-      <div class="source-row-inputs">
-        <input type="url" placeholder="https://… (or upload a file →)"
-          value="${esc(s.url)}"
-          oninput="updateSrcUrl(${si}, this.value)"
-          ${s.fileName ? 'style="opacity:0.45;pointer-events:none"' : ''}>
-        <label class="btn-upload ${s.fileName ? 'has-file' : ''}"
-               title="Upload research paper (PDF, TXT, DOCX, MD)">
-          <i class="ti ${s.fileName ? 'ti-file-check' : 'ti-file-upload'}"></i>
-          ${s.fileName ? 'Uploaded' : 'Upload'}
-          <input type="file" accept=".pdf,.txt,.docx,.doc,.md"
-            style="display:none" onchange="handleFile(${si}, this)">
-        </label>
-        ${a.sources.length > 1
-          ? `<button class="btn-remove-src" onclick="removeSource(${si})" title="Remove source">
-               <i class="ti ti-x"></i>
-             </button>`
-          : ''}
-      </div>
-      ${s.fileName
-        ? `<div class="file-badge"><i class="ti ti-paperclip"></i> ${esc(s.fileName)}</div>`
-        : ''}
-    </div>
-  `).join('');
-
-  const isRunning = a.status === 'running';
-
-  document.getElementById('main-body').innerHTML = `
-
-    <!-- Article details -->
-    <div class="card">
-      <div class="card-title"><i class="ti ti-file-description"></i> Article Details</div>
-      <div class="field-grid">
-        <div class="field full">
-          <label>Article title / subject</label>
-          <input type="text"
-            placeholder="e.g. Emerging Threat: Salt Typhoon Telecom Intrusions"
-            value="${esc(a.title)}"
-            oninput="update('title', this.value)">
-        </div>
-        <div class="field">
-          <label>Publication date</label>
-          <input type="text" value="${esc(a.date)}" oninput="update('date', this.value)">
-        </div>
-        <div class="field">
-          <label>Severity classification</label>
-          <div class="sev-row">
-            ${['CRITICAL','HIGH','MEDIUM','LOW','INFORMATIONAL'].map(sv => `
-              <button class="sev-btn ${a.severity === sv ? 'sel-' + sv : ''}"
-                onclick="setSeverity('${sv}')">${sv}</button>
-            `).join('')}
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Sources -->
-    <div class="card">
-      <div class="card-title">
-        <i class="ti ti-link"></i>
-        Sources
-        <span style="font-weight:400;color:var(--text-muted);text-transform:none;letter-spacing:0">
-          — URL or upload &nbsp;·&nbsp; minimum 5
-        </span>
-      </div>
-      <div class="source-list" id="source-list">${sourcesHtml}</div>
-      <button class="btn-add-src" onclick="addSource()">
-        <i class="ti ti-plus" style="font-size:12px"></i> Add source
-      </button>
-    </div>
-
-    <!-- Generate -->
-    <button class="btn-generate" onclick="runSingle()" ${isRunning ? 'disabled' : ''}>
-      ${isRunning
-        ? '<span class="spinner"></span> Generating editorial brief…'
-        : '<i class="ti ti-sparkles"></i> Generate editorial brief'}
-    </button>
-
-    <!-- Output -->
-    ${a.status === 'done' && a.output ? `
-      <div class="output-card">
-        <div class="output-header">
-          <div class="output-label">
-            <i class="ti ti-file-check"></i> Editorial Brief — Article ${a.id}
-          </div>
-        </div>
-        <div class="output-text" id="output-text-${activeIdx}">${esc(a.output)}</div>
-        <div class="output-actions">
-          <button class="btn-copy" onclick="copyOutput(${activeIdx})">
-            <i class="ti ti-copy" style="font-size:13px"></i> Copy
-          </button>
-          <button class="btn-download" onclick="downloadOutput(${activeIdx})">
-            <i class="ti ti-download" style="font-size:13px"></i> Download .txt
-          </button>
-        </div>
-      </div>
-    ` : ''}
-
-    ${a.status === 'error' && a.output ? `
-      <div class="error-card">
-        <strong>Error:</strong> ${esc(a.output)}
-      </div>
-    ` : ''}
-  `;
-}
-
-/* ── State mutators ──────────────────────── */
-function selectSlot(i) { activeIdx = i; renderSlots(); renderMain(); }
-
-function update(field, val) {
-  articles[activeIdx][field] = val;
-  if (field === 'title') renderSlots();
-  saveQueue();
-}
-
-function setSeverity(s) { articles[activeIdx].severity = s; saveQueue(); renderMain(); }
-
-function updateSrcUrl(i, val) {
-  articles[activeIdx].sources[i].url = val;
-  saveQueue();
-}
-
-function addSource() {
-  articles[activeIdx].sources.push(blankSource());
-  saveQueue();
-  renderMain();
-}
-
-function removeSource(i) {
-  if (articles[activeIdx].sources.length <= 1) return;
-  articles[activeIdx].sources.splice(i, 1);
-  saveQueue();
-  renderMain();
-}
-
-function handleFile(srcIdx, input) {
-  const file = input.files[0];
-  if (!file) return;
-  const src = articles[activeIdx].sources[srcIdx];
-  src.fileName = file.name;
-  src.fileType = file.type;
-  src.url = '';
-
-  const reader = new FileReader();
-  if (file.type === 'application/pdf') {
-    reader.onload = e => {
-      src.fileData = e.target.result.split(',')[1];
-      src.isBase64 = true;
-      renderMain();
-    };
-    reader.readAsDataURL(file);
-  } else {
-    reader.onload = e => {
-      src.fileData = e.target.result;
-      src.isBase64 = false;
-      renderMain();
-    };
-    reader.readAsText(file);
-  }
-}
-
-/* ── API ─────────────────────────────────── */
-function buildMessages(a) {
-  const urlSources  = a.sources.filter(s => s.url.trim());
-  const fileSources = a.sources.filter(s => s.fileName && s.fileData);
-  const urlList = urlSources.map((s, i) => `${i + 1}. ${s.url}`).join('\n');
-
-  const content = [];
-
-  fileSources.forEach(s => {
-    if (s.isBase64) {
-      content.push({
-        type: 'document',
-        source: { type: 'base64', media_type: 'application/pdf', data: s.fileData },
-        title: s.fileName
-      });
-    } else {
-      content.push({
-        type: 'text',
-        text: `--- UPLOADED SOURCE DOCUMENT: ${s.fileName} ---\n${s.fileData}\n--- END OF DOCUMENT ---`
-      });
-    }
-  });
-
-  content.push({
-    type: 'text',
-    text: `Date: [${a.date}]
-Severity: ${a.severity}
-Primary Subject: ${a.title}
-${urlSources.length ? `\nSource URLs:\n${urlList}` : ''}
-${fileSources.length ? `\n${fileSources.length} research paper(s) uploaded above — treat as Source Architecture.` : ''}
-
-Generate the complete CyberSense Detailed Article editorial brief following the full Acquisition Editor output format.`
-  });
-
-  return [{ role: 'user', content }];
-}
-
-async function callClaude(a) {
-  const res = await fetch('/api/brief', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 4096,
-      system: SYSTEM_PROMPT,
-      messages: buildMessages(a)
-    })
-  });
-
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err?.error?.message || `API error ${res.status}`);
-  }
-  const data = await res.json();
-  return data.content.map(b => b.text || '').join('');
-}
-
-/* ── Run actions ─────────────────────────── */
-async function runSingle() {
-  const a = articles[activeIdx];
-  if (!a.title.trim()) { alert('Add an article title first.'); return; }
-  a.status = 'running'; a.output = null;
-  renderSlots(); renderMain();
-  try {
-    a.output = await callClaude(a);
-    a.status = 'done';
-  } catch (e) {
-    a.output = e.message;
-    a.status = 'error';
-  }
-  saveQueue();
-  renderSlots(); renderMain();
-}
-
-async function runAll() {
-  const btn = document.getElementById('btn-run-all');
-  const prog = document.getElementById('batch-progress');
-  const bar  = document.getElementById('batch-bar');
-  const lbl  = document.getElementById('batch-label');
-
-  const toRun = articles.filter(a => a.title.trim() && a.status !== 'running');
-  if (!toRun.length) { alert('Add at least one article title to run.'); return; }
-
-  btn.disabled = true;
-  prog.style.display = 'block';
-  let done = 0;
-
-  for (const a of toRun) {
-    lbl.textContent = `Article ${a.id} of ${toRun.length} — generating…`;
-    a.status = 'running'; a.output = null;
-    renderSlots();
-    if (activeIdx === a.id - 1) renderMain();
-
-    try {
-      a.output = await callClaude(a);
-      a.status = 'done';
-    } catch (e) {
-      a.output = e.message;
-      a.status = 'error';
-    }
-    done++;
-    bar.style.width = `${Math.round((done / toRun.length) * 100)}%`;
-    saveQueue();
-    renderSlots();
-    if (activeIdx === a.id - 1) renderMain();
-  }
-
-  lbl.textContent = `Batch complete — ${done} brief${done !== 1 ? 's' : ''} generated`;
-  btn.disabled = false;
-}
-
-/* ── Output actions ──────────────────────── */
-function copyOutput(i) {
-  const el = document.getElementById(`output-text-${i}`);
-  if (!el) return;
-  navigator.clipboard.writeText(el.textContent).then(() => {
-    const btn = el.closest('.output-card').querySelector('.btn-copy');
-    if (btn) {
-      btn.innerHTML = '<i class="ti ti-check" style="font-size:13px"></i> Copied';
-      setTimeout(() => {
-        btn.innerHTML = '<i class="ti ti-copy" style="font-size:13px"></i> Copy';
-      }, 2000);
-    }
-  });
-}
-
-function downloadOutput(i) {
-  const a = articles[i];
-  if (!a?.output) return;
-  const blob = new Blob([a.output], { type: 'text/plain' });
-  const url  = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = `cybersense-brief-${a.title.replace(/[^a-z0-9]/gi, '-').toLowerCase() || `article-${i+1}`}.txt`;
-  link.click();
-  URL.revokeObjectURL(url);
-}
-
-/* ── Utilities ───────────────────────────── */
-function esc(s) {
-  if (!s) return '';
-  return String(s)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
-/* ── Boot ────────────────────────────────── */
-renderSlots();
-renderMain();
-</script>
 </body>
 </html>

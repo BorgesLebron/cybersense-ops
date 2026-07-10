@@ -42,7 +42,15 @@ app.post('/api/brief', async (req, res) => {
   }
 });
 
-// ── Fallback — serve index.html for any unmatched route ───────────────────────
+// ── Clean URLs — /agents/intel-brief/james → james.html ──────────────────────
+app.get('/agents/:pipeline/:agent', (req, res) => {
+  const file = path.join(__dirname, 'agents', req.params.pipeline, req.params.agent + '.html');
+  res.sendFile(file, err => {
+    if (err) res.status(404).send('Agent not found.');
+  });
+});
+
+// ── Fallback ──────────────────────────────────────────────────────────────────
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
