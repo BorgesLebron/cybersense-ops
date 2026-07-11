@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Developmental Editor — CyberSense Ops</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0d1117;
+    --surface-1: #161b22;
+    --surface-2: #1c2128;
+    --surface-3: #21262d;
+    --border:    #30363d;
+    --border-strong: #484f58;
+    --text-primary:   #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted:     #484f58;
+    --accent:    #4fc3f7;
+    --accent-bg: rgba(79,195,247,0.08);
+    --accent-border: rgba(79,195,247,0.3);
+    --success:   #3fb950;
+    --success-bg: rgba(63,185,80,0.08);
+    --danger:    #f85149;
+    --danger-bg: rgba(248,81,73,0.08);
+    --warning:   #d29922;
+    --warning-bg: rgba(210,153,34,0.08);
+    --brand:     #1a1a2e;
+    --radius:    6px;
+    --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-mono: 'SF Mono', 'Fira Code', monospace;
+    --font-voice: Georgia, 'Times New Roman', serif;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    grid-template-rows: 100vh;
+    overflow: hidden;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    background: var(--surface-1);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .sidebar-head {
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .logo-mark {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: var(--brand);
+    border: 1px solid var(--accent-border);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .logo-mark span { color: var(--accent); font-size: 13px; font-weight: 700; }
+
+  .pub-name  { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+  .pub-sub   { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+
+  /* ── Agent card in sidebar ── */
+  .agent-card {
+    margin: 12px;
+    padding: 12px;
+    background: var(--accent-bg);
+    border: 1px solid var(--accent-border);
+    border-radius: var(--radius);
+    flex-shrink: 0;
+  }
+  .agent-name {
+    font-size: 13px; font-weight: 700; color: var(--accent);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .agent-role {
+    font-size: 11px; color: var(--text-secondary); margin-top: 3px;
+  }
+  .pipeline-badge {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.07em;
+    background: var(--surface-3); color: var(--text-muted);
+    border: 1px solid var(--border); border-radius: 4px;
+    padding: 2px 6px; margin-top: 8px; display: inline-block;
+  }
+
+  /* ── Sidebar pipeline nav ── */
+  .pipeline-label {
+    font-size: 10px; color: var(--text-muted);
+    padding: 14px 16px 6px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    flex-shrink: 0;
+  }
+
+  .pipeline-steps {
+    padding: 0 12px;
+    flex-shrink: 0;
+  }
+
+  .step {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 8px;
+    border-radius: var(--radius);
+    font-size: 12px;
+    color: var(--text-muted);
+    position: relative;
+  }
+  .step.active { color: var(--accent); background: var(--accent-bg); }
+  .step.done   { color: var(--success); }
+
+  .step-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border-strong);
+    flex-shrink: 0;
+  }
+  .step.active .step-dot { background: var(--accent); }
+  .step.done   .step-dot { background: var(--success); }
+
+  /* ── Session info in sidebar ── */
+  .session-section {
+    margin: 0 12px 12px;
+    padding: 10px 12px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    flex-shrink: 0;
+  }
+  .session-label {
+    font-size: 10px; color: var(--text-muted);
+    letter-spacing: 0.07em; text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .session-row {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 11px; color: var(--text-secondary);
+    margin-bottom: 4px;
+  }
+  .session-row:last-child { margin-bottom: 0; }
+  .session-val { color: var(--text-primary); font-weight: 500; }
+  .status-badge {
+    font-size: 10px; font-weight: 600;
+    padding: 2px 7px; border-radius: 10px;
+  }
+  .status-badge.idle    { background: var(--surface-3); color: var(--text-muted); }
+  .status-badge.running { background: var(--accent-bg); color: var(--accent); }
+  .status-badge.done    { background: var(--success-bg); color: var(--success); }
+  .status-badge.error   { background: var(--danger-bg); color: var(--danger); }
+
+  .sidebar-spacer { flex: 1; }
+
+  /* ── Sidebar footer ── */
+  .sidebar-footer {
+    padding: 12px;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .footer-link {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 11px; color: var(--text-muted);
+    text-decoration: none;
+    padding: 5px 6px;
+    border-radius: var(--radius);
+    transition: background 0.1s, color 0.1s;
+  }
+  .footer-link:hover { background: var(--surface-2); color: var(--text-secondary); }
+
+  /* ── Main ── */
+  .main {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .topbar {
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+
+  .topbar-title {
+    font-size: 14px; font-weight: 600; color: var(--text-primary);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .topbar-title i { color: var(--accent); font-size: 16px; }
+
+  .topbar-meta {
+    font-size: 11px; color: var(--text-muted);
+    display: flex; align-items: center; gap: 14px;
+  }
+
+  .content-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .card-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .card-title {
+    font-size: 12px; font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .card-title i { font-size: 14px; }
+
+  .card-body { padding: 16px; }
+
+  /* ── Form fields ── */
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+
+  .field-label {
+    font-size: 11px; font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase; letter-spacing: 0.07em;
+    margin-bottom: 6px;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .field-hint {
+    font-size: 11px; color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  .field input[type=text] {
+    width: 100%;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-primary);
+    font-size: 13px;
+    padding: 8px 10px;
+    outline: none;
+    transition: border-color 0.15s;
+    font-family: var(--font-sans);
+  }
+  .field input[type=text]:focus { border-color: var(--accent); }
+  .field input[type=text]::placeholder { color: var(--text-muted); }
+
+  .field input.mono {
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+
+  textarea {
+    width: 100%;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-primary);
+    font-size: 12px;
+    font-family: var(--font-mono);
+    line-height: 1.6;
+    padding: 10px 12px;
+    outline: none;
+    resize: vertical;
+    transition: border-color 0.15s;
+  }
+  textarea:focus { border-color: var(--accent); }
+  textarea::placeholder { color: var(--text-muted); font-family: var(--font-sans); font-size: 13px; }
+
+  /* ── Upload area ── */
+  .upload-zone {
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    position: relative;
+  }
+  .upload-zone:hover { border-color: var(--accent); background: var(--accent-bg); }
+  .upload-zone input[type=file] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%;
+  }
+  .upload-zone-icon { color: var(--text-muted); font-size: 18px; flex-shrink: 0; }
+  .upload-zone-text { font-size: 12px; color: var(--text-secondary); }
+  .upload-zone-text strong { color: var(--text-primary); }
+  .upload-zone-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+  .upload-loaded {
+    background: var(--success-bg);
+    border-color: rgba(63,185,80,0.3);
+  }
+  .upload-loaded .upload-zone-icon { color: var(--success); }
+  .upload-loaded .upload-zone-text strong { color: var(--success); }
+
+  /* ── Date row ── */
+  .meta-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  /* ── Severity selector ── */
+  .sev-group {
+    display: flex; gap: 6px; flex-wrap: wrap;
+  }
+  .sev-btn {
+    font-size: 11px; font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.1s;
+    letter-spacing: 0.05em;
+  }
+  .sev-btn:hover { border-color: var(--border-strong); color: var(--text-secondary); }
+  .sev-btn.active-CRITICAL { background: rgba(248,81,73,0.15); border-color: #f85149; color: #f85149; }
+  .sev-btn.active-HIGH     { background: rgba(210,153,34,0.15); border-color: #d29922; color: #d29922; }
+  .sev-btn.active-MEDIUM   { background: rgba(79,195,247,0.15); border-color: #4fc3f7; color: #4fc3f7; }
+  .sev-btn.active-LOW      { background: rgba(63,185,80,0.15);  border-color: #3fb950; color: #3fb950; }
+  .sev-btn.active-INFORMATIONAL { background: var(--surface-3); border-color: var(--border-strong); color: var(--text-secondary); }
+
+  /* ── Run button ── */
+  .btn-generate {
+    width: 100%;
+    padding: 10px 16px;
+    background: var(--accent-bg);
+    border: 1px solid var(--accent-border);
+    border-radius: var(--radius);
+    color: var(--accent);
+    font-size: 13px; font-weight: 600;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: background 0.1s;
+  }
+  .btn-generate:hover:not(:disabled) { background: rgba(79,195,247,0.14); }
+  .btn-generate:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ── Spinner ── */
+  .spinner {
+    width: 14px; height: 14px;
+    border: 2px solid var(--accent-border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: none;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Output ── */
+  .output-card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    display: none;
+  }
+  .output-card.visible { display: block; }
+
+  .output-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .output-label {
+    font-size: 12px; font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase; letter-spacing: 0.07em;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .output-actions { display: flex; gap: 8px; }
+
+  .btn-action {
+    font-size: 11px; font-weight: 600;
+    padding: 5px 10px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex; align-items: center; gap: 5px;
+    transition: background 0.1s, border-color 0.1s;
+  }
+  .btn-action:hover { background: var(--surface-3); border-color: var(--border-strong); }
+  .btn-action.primary {
+    background: var(--accent-bg);
+    border-color: var(--accent-border);
+    color: var(--accent);
+  }
+  .btn-action.primary:hover { background: rgba(79,195,247,0.14); }
+
+  .output-filename {
+    padding: 8px 16px;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--border);
+    font-size: 11px; font-family: var(--font-mono);
+    color: var(--text-muted);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .output-filename i { font-size: 13px; }
+
+  .output-body {
+    padding: 20px;
+    max-height: 600px;
+    overflow-y: auto;
+  }
+
+  .output-text {
+    font-family: var(--font-voice);
+    font-size: 13px;
+    line-height: 1.75;
+    color: var(--text-primary);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  /* ── Error state ── */
+  .error-box {
+    background: var(--danger-bg);
+    border: 1px solid rgba(248,81,73,0.3);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    font-size: 12px;
+    color: var(--danger);
+    display: none;
+  }
+  .error-box.visible { display: block; }
+
+  /* ── Info callout ── */
+  .info-callout {
+    background: var(--accent-bg);
+    border: 1px solid var(--accent-border);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .info-callout i { color: var(--accent); font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  /* ── Token counter ── */
+  .token-row {
+    display: flex; justify-content: flex-end;
+    font-size: 11px; color: var(--text-muted);
+    margin-top: 6px;
+  }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════ SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-head">
+    <div class="logo-mark"><span>CS</span></div>
+    <div>
+      <div class="pub-name">CyberSense Ops</div>
+      <div class="pub-sub">Intel Brief Pipeline</div>
+    </div>
+  </div>
+
+  <div class="agent-card">
+    <div class="agent-name">
+      <i class="ti ti-pencil"></i> Jason
+    </div>
+    <div class="agent-role">Developmental &amp; Structural Editor</div>
+    <div class="pipeline-badge">INTEL BRIEF · STAGE 2 OF 6</div>
+  </div>
+
+  <div class="pipeline-label">Pipeline Stages</div>
+  <div class="pipeline-steps">
+    <div class="step done">
+      <div class="step-dot"></div>
+      <span>James — Acquisitions Editor</span>
+    </div>
+    <div class="step active">
+      <div class="step-dot"></div>
+      <span>Jason — Developmental Editor</span>
+    </div>
+    <div class="step">
+      <div class="step-dot"></div>
+      <span>Rob — Editor in Chief</span>
+    </div>
+    <div class="step">
+      <div class="step-dot"></div>
+      <span>Maya — Graphic Designer</span>
+    </div>
+    <div class="step">
+      <div class="step-dot"></div>
+      <span>Mary — UI Developer</span>
+    </div>
+    <div class="step">
+      <div class="step-dot"></div>
+      <span>Ethan — Publisher</span>
+    </div>
+  </div>
+
+  <div class="pipeline-label" style="margin-top:12px;">Session</div>
+  <div class="session-section">
+    <div class="session-row">
+      <span>Status</span>
+      <span class="status-badge idle" id="status-badge">Idle</span>
+    </div>
+    <div class="session-row">
+      <span>Article</span>
+      <span class="session-val" id="session-title">—</span>
+    </div>
+    <div class="session-row">
+      <span>Date</span>
+      <span class="session-val" id="session-date">—</span>
+    </div>
+    <div class="session-row">
+      <span>Severity</span>
+      <span class="session-val" id="session-sev">—</span>
+    </div>
+  </div>
+
+  <div class="sidebar-spacer"></div>
+
+  <div class="sidebar-footer">
+    <a class="footer-link" href="/agents/intel-brief/james.html">
+      <i class="ti ti-arrow-left" style="font-size:13px"></i> Back to James
+    </a>
+    <a class="footer-link" href="/" style="margin-top:2px;">
+      <i class="ti ti-layout-dashboard" style="font-size:13px"></i> Ops Dashboard
+    </a>
+  </div>
+</aside>
+
+<!-- ══════════════════════════════════════════════════════════ MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">
+      <i class="ti ti-file-text"></i>
+      Developmental &amp; Structural Editor
+    </div>
+    <div class="topbar-meta">
+      <span>Input: James .txt</span>
+      <span>Output: Jason .txt</span>
+      <span>Stage 2 of 6</span>
+    </div>
+  </div>
+
+  <div class="content-area">
+
+    <!-- Info callout -->
+    <div class="info-callout">
+      <i class="ti ti-info-circle"></i>
+      <span>Paste or upload the acquisitions brief from James. Jason will develop it into a full publication-quality article draft ready for Rob's editorial review.</span>
+    </div>
+
+    <!-- Input card -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><i class="ti ti-file-import"></i> Article Input</div>
+      </div>
+      <div class="card-body">
+
+        <!-- Upload zone -->
+        <div class="field">
+          <div class="field-label"><i class="ti ti-upload" style="font-size:13px"></i> Upload Brief</div>
+          <div class="upload-zone" id="upload-zone">
+            <input type="file" accept=".txt,.md" id="file-input" onchange="handleFileUpload(this)">
+            <div class="upload-zone-icon"><i class="ti ti-file-upload"></i></div>
+            <div>
+              <div class="upload-zone-text"><strong>Upload James's .txt output</strong></div>
+              <div class="upload-zone-sub">or paste the brief directly below</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Paste area -->
+        <div class="field">
+          <div class="field-label"><i class="ti ti-clipboard" style="font-size:13px"></i> Acquisitions Brief</div>
+          <textarea id="brief-input" rows="12"
+            placeholder="Paste the acquisitions brief from James here…&#10;&#10;(Editorial Brief: Article Title&#10;PRIMARY METADATA FIELDS&#10;…)"></textarea>
+          <div class="token-row" id="char-count">0 characters</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Article metadata card -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><i class="ti ti-tag"></i> Article Metadata</div>
+      </div>
+      <div class="card-body">
+
+        <div class="field">
+          <div class="field-label">Article Title</div>
+          <input type="text" id="article-title" placeholder="Full article title for session tracking"
+            oninput="updateSession()">
+        </div>
+
+        <div class="meta-row">
+          <div class="field">
+            <div class="field-label">Publication Date</div>
+            <input type="text" id="article-date" placeholder="July 10, 2026"
+              oninput="updateSession()">
+          </div>
+          <div class="field">
+            <div class="field-label">Output Slug</div>
+            <input type="text" id="article-slug" class="mono"
+              placeholder="autonomous-soc-attack-surface"
+              oninput="updateFilename()">
+            <div class="field-hint">3–5 word kebab-case slug for the output filename</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Severity</div>
+          <div class="sev-group" id="sev-group">
+            <button class="sev-btn" onclick="setSeverity('CRITICAL')">CRITICAL</button>
+            <button class="sev-btn" onclick="setSeverity('HIGH')">HIGH</button>
+            <button class="sev-btn" onclick="setSeverity('MEDIUM')">MEDIUM</button>
+            <button class="sev-btn" onclick="setSeverity('LOW')">LOW</button>
+            <button class="sev-btn active-INFORMATIONAL" onclick="setSeverity('INFORMATIONAL')">INFORMATIONAL</button>
+          </div>
+        </div>
+
+        <!-- Filename preview -->
+        <div class="field" style="margin-bottom:0;">
+          <div class="field-label">Output Filename Preview</div>
+          <div style="font-family: var(--font-mono); font-size:12px; color: var(--accent);
+            background: var(--surface-2); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 8px 10px;" id="filename-preview">
+            YYYYMMDD_jason_slug_v1.txt
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Generate button -->
+    <button class="btn-generate" id="btn-generate" onclick="runJason()">
+      <div class="spinner" id="spinner"></div>
+      <i class="ti ti-wand" id="btn-icon" style="font-size:15px"></i>
+      <span id="btn-label">Develop Article Draft</span>
+    </button>
+
+    <!-- Error box -->
+    <div class="error-box" id="error-box"></div>
+
+    <!-- Output card -->
+    <div class="output-card" id="output-card">
+      <div class="output-header">
+        <div class="output-label"><i class="ti ti-file-check"></i> Draft Article — Ready for Rob</div>
+        <div class="output-actions">
+          <button class="btn-action" id="btn-copy" onclick="copyOutput()">
+            <i class="ti ti-copy" style="font-size:13px"></i> Copy
+          </button>
+          <button class="btn-action primary" onclick="downloadOutput()">
+            <i class="ti ti-download" style="font-size:13px"></i> Download .txt
+          </button>
+        </div>
+      </div>
+      <div class="output-filename" id="output-filename">
+        <i class="ti ti-file-text"></i>
+        <span id="filename-display">jason_output.txt</span>
+      </div>
+      <div class="output-body">
+        <div class="output-text" id="output-text"></div>
+      </div>
+    </div>
+
+  </div><!-- /content-area -->
+</div><!-- /main -->
+
+<!-- ══════════════════════════════════════════════════════════ SCRIPT -->
+<script>
+/* ── System Prompt ──────────────────────────────────────────────────── */
+const SYSTEM_PROMPT = `Developmental & Structural Editor
+You are the Developmental & Structural Editor for CyberSense Detailed Articles, a comprehensive intelligence publication designed for security practitioners, institutional strategists, technology leaders, and policy-aware professionals who require depth beyond daily awareness. Your role is to transform the Acquisitions Editor's structured outline into a cohesive, publication-quality article that maintains analytical rigor, contextual precision, and strategic usefulness without sensationalism or technical opacity. You operate between sourcing and final editorial authority, prioritizing narrative architecture, evidence-based reasoning, audience calibration, and intellectual integrity.
+You are responsible for structuring and developing multi-section content while preserving analytical neutrality, proportional risk representation, institutional credibility, and accessibility across technical and non-technical audiences. You do not introduce ideological framing, policy advocacy, or alarmist narrative constructs. You write for informed professionals seeking actionable insight and strategic context.
+SPECIFIC INFORMATION
+You are provided with:
+An outline produced by the Acquisitions Editor containing:
+  • Primary Article Theme with strategic rationale
+  • Opening Thesis statement
+  • Source Architecture (minimum five credible sources)
+  • Event summary, significance analysis, and operational context
+  • Severity classification and Key Finding statement
+  • Complete technical metadata (CVE/ID, CVSS, Classification, etc.)
+  • Audience segment mapping and thematic connectors
+EDITORIAL STANDARDS
+Narrative coherence across seven primary sections:
+  1. Title, Publication Date, and Severity Classification
+  2. Executive Summary
+  3. Key Finding (formatted as bolded standalone statement immediately following Executive Summary header)
+  4. What Happened
+  5. Why It Matters
+  6. Operational Implications
+  7. Recommended Actions
+  8. Closing Statement
+  9. Technical Data section
+Evidence-based reasoning supported by cited sources
+Technical precision without specialist-only language barriers
+Hedging language for proportional realism and uncertainty acknowledgment
+Domain-specific nuance and real-world decision-making context
+Suppression of sensational language and speculative framing
+Audience calibration across practitioner, leadership, and policy-aware segments
+BRANDING AND CONTINUITY RULES
+Institutional phrases such as "bridging the awareness gap," "institutional resilience," "threat landscape," "decrypting emerging risks," and "digital discipline"
+Avoidance of inflammatory terminology in favor of neutral, professional language (e.g., "threat actors," "cybercriminals," or "actors" rather than "attackers")
+Integration of strategic continuity with Daily Digital Awareness Brief mission
+Proportional depth allocation across sections based on audience utility
+Clear, accessible technical explanation without over-simplification
+STRUCTURAL LAYOUT REQUIREMENTS
+Title & Publication Information: Include article title, publication date, and severity classification immediately beneath the title.
+Executive Summary (150-200 words): A front-facing brief synthesizing the article's core insight, primary risk, and key recommendation for rapid audience intake. Write for time-constrained practitioners and decision-makers. Include one actionable takeaway.
+Key Finding (1-2 sentences): A bolded statement capturing the central technical or strategic truth of the article. This appears immediately following the Executive Summary header. Write with precision and impact. Example format: "**Key Finding:** [Concise, impactful statement of the article's central insight]."
+What Happened (400-600 words): A detailed, chronological or thematic account of the subject matter including events, developments, policy shifts, or technological evolution. Ground narrative in specific dates, organizations, and data points. Maintain neutrality and proportional emphasis. Incorporate technical details from source materials with precision.
+Why It Matters (300-400 words): An analysis of institutional and operational significance. Address impact across audience segments (security practitioners, security leaders, policy-aware executives, workforce development professionals). Explain second and third-order consequences. Use subheadings by audience segment if appropriate to enhance clarity.
+Operational Implications (350-450 words): Concrete, sector-wide or role-specific implications for current security posture, incident response protocols, architecture decisions, and strategic planning. Distinguish between immediate, short-term, and long-term implications. Avoid vague platitudes. Ground in real-world defensive constraints and decision-making contexts.
+Recommended Actions (300-400 words): Actionable guidance stratified by organizational maturity level (Baseline, Intermediate, Advanced). Format as tiered recommendations so organizations of varying resource and technical capability can extract relevant actions. Prioritize by impact and feasibility. Make recommendations specific and implementable.
+Closing Statement (100-150 words): A reflective conclusion that ties the article to broader institutional resilience and awareness mission. Include forward-looking context without speculation. End with a memorable phrase or insight that encapsulates the article's central strategic value.
+Technical Data Section: Structured presentation of all technical metadata extracted by the Acquisitions Editor, formatted for clarity and reference:
+  • CVE/ID: [List all relevant identifiers]
+  • CVSS Score: [Scores with severity ratings]
+  • Classification: [Threat actor family/nation-state nexus, attack category, etc.]
+  • Announced: [Publication date and source organization]
+  • Tracked Activity: [Threat groups, campaigns, operational status]
+  • Attack Vectors: [Specific technical exploitation methodologies]
+  • Target Platforms: [Operating systems, device types, hardware categories]
+  • Target Product: [Specific product names and vendors]
+  • Target Environment: [Organizational or network contexts]
+  • Exposure Window: [Timeline and current threat status]
+OPERATIONAL PRIORITIES
+Preserve analytical neutrality and suppress sensational framing.
+Calibrate technical density to a professional but cross-functional audience.
+Use hedging language to reflect uncertainty and proportional risk.
+Integrate interpretive connectors to improve narrative flow.
+Embed domain-specific nuance and practical implications.
+Maintain proportional section depth so content serves all intended audience segments.
+Avoid topic drift or introduction of new source material not present in the outline.
+Ensure all technical metadata is presented accurately and is aligned with narrative content.
+Do not perform final ratification or strategic reframing that belongs to the Editor-in-Chief. Flag unresolved ambiguities or potential editorial risks implicitly through careful phrasing.
+CANONICAL SECTION ORDER
+1. Title and publication date with severity classification
+2. Executive Summary
+3. Key Finding
+4. What Happened
+5. Why It Matters
+6. Operational Implications
+7. Recommended Actions
+8. Closing Statement
+9. Technical Data
+PRODUCTION CONSTRAINTS
+Write a compelling 150-200 word Executive Summary suitable for front-page placement.
+Craft a bolded Key Finding statement that is precise, impactful, and immediately meaningful to professional readers.
+Develop a detailed, evidence-based "What Happened" narrative grounded in sourced material.
+Analyze significance across multiple audience segments in "Why It Matters."
+Specify concrete, role-appropriate implications in "Operational Implications."
+Provide stratified, actionable recommendations organized by organizational maturity in "Recommended Actions."
+Craft a reflective but forward-looking "Closing Statement."
+Present all technical metadata accurately and formatted for clarity and reference.
+Conclude with a single, memorable phrase or key takeaway that encapsulates the article's central insight.
+Use minimal formatting; employ subheadings and bullet points only when required for clarity.
+Avoid ideological language, political commentary, and speculative framing.
+Do not include editorial notes, justifications, or references to internal workflow.
+Deliver only the draft article content as it should appear for internal editorial review.
+HANDOFF TO EDITOR-IN-CHIEF
+Do not perform final ratification, reputational risk arbitration, or strategic reframing. Your responsibility ends at a clean, well-structured draft ready for final editorial review. Flag any ambiguities or risks through careful phrasing rather than meta-commentary. The Editor-in-Chief will validate source credibility, assess risk sensitivity, and authorize publication.
+Acquisitions Outline: Detailed Article`;
+
+/* ── State ──────────────────────────────────────────────────────────── */
+let severity   = 'INFORMATIONAL';
+let outputText = '';
+
+/* ── File upload ────────────────────────────────────────────────────── */
+function handleFileUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('brief-input').value = e.target.result;
+    updateCharCount();
+    // Auto-populate date from filename if pattern matches YYYYMMDD
+    const match = file.name.match(/(\d{4})(\d{2})(\d{2})/);
+    if (match && !document.getElementById('article-date').value) {
+      const months = ['January','February','March','April','May','June',
+                      'July','August','September','October','November','December'];
+      const d = new Date(match[1], parseInt(match[2])-1, match[3]);
+      document.getElementById('article-date').value =
+        `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+      updateSession();
+    }
+    const zone = document.getElementById('upload-zone');
+    zone.classList.add('upload-loaded');
+    zone.querySelector('.upload-zone-text strong').textContent = file.name;
+    zone.querySelector('.upload-zone-sub').textContent = 'Loaded — edit below if needed';
+  };
+  reader.readAsText(file);
+}
+
+/* ── Char count ─────────────────────────────────────────────────────── */
+document.getElementById('brief-input').addEventListener('input', updateCharCount);
+function updateCharCount() {
+  const len = document.getElementById('brief-input').value.length;
+  document.getElementById('char-count').textContent =
+    len.toLocaleString() + ' characters';
+}
+
+/* ── Severity ───────────────────────────────────────────────────────── */
+function setSeverity(sev) {
+  severity = sev;
+  document.querySelectorAll('.sev-btn').forEach(b => {
+    b.className = 'sev-btn' + (b.textContent === sev ? ` active-${sev}` : '');
+  });
+  updateSession();
+}
+
+/* ── Session sidebar ────────────────────────────────────────────────── */
+function updateSession() {
+  const title = document.getElementById('article-title').value.trim();
+  const date  = document.getElementById('article-date').value.trim();
+  document.getElementById('session-title').textContent = title || '—';
+  document.getElementById('session-date').textContent  = date  || '—';
+  document.getElementById('session-sev').textContent   = severity;
+  updateFilename();
+}
+
+/* ── Filename preview ───────────────────────────────────────────────── */
+function updateFilename() {
+  const date = document.getElementById('article-date').value.trim();
+  const slug = document.getElementById('article-slug').value.trim()
+               .toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-');
+
+  let dateStr = 'YYYYMMDD';
+  if (date) {
+    const d = new Date(date);
+    if (!isNaN(d)) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth()+1).padStart(2,'0');
+      const day = String(d.getDate()).padStart(2,'0');
+      dateStr = `${y}${m}${day}`;
+    }
+  }
+
+  const slugStr = slug || 'slug';
+  const fname = `${dateStr}_jason_${slugStr}_v1.txt`;
+  document.getElementById('filename-preview').textContent = fname;
+  document.getElementById('filename-display').textContent = fname;
+}
+
+/* ── API call ───────────────────────────────────────────────────────── */
+async function runJason() {
+  const brief = document.getElementById('brief-input').value.trim();
+  if (!brief) { alert('Paste or upload the acquisitions brief first.'); return; }
+
+  const title = document.getElementById('article-title').value.trim() || 'Untitled Article';
+
+  setRunning(true);
+  clearOutput();
+
+  try {
+    const res = await fetch('/api/brief', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 8192,
+        system: SYSTEM_PROMPT,
+        messages: [{
+          role: 'user',
+          content: brief
+        }]
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err?.error?.message || `API error ${res.status}`);
+    }
+
+    const data = await res.json();
+    outputText = data.content.map(b => b.text || '').join('');
+
+    showOutput(outputText);
+    setStatus('done', title);
+
+  } catch (e) {
+    showError(e.message);
+    setStatus('error', title);
+  }
+
+  setRunning(false);
+}
+
+/* ── UI helpers ─────────────────────────────────────────────────────── */
+function setRunning(on) {
+  const btn     = document.getElementById('btn-generate');
+  const spinner = document.getElementById('spinner');
+  const icon    = document.getElementById('btn-icon');
+  const label   = document.getElementById('btn-label');
+  btn.disabled        = on;
+  spinner.style.display = on ? 'block' : 'none';
+  icon.style.display    = on ? 'none'  : 'inline-block';
+  label.textContent     = on ? 'Developing draft…' : 'Develop Article Draft';
+  if (on) {
+    const title = document.getElementById('article-title').value.trim() || 'Untitled';
+    setStatus('running', title);
+  }
+}
+
+function setStatus(state, title) {
+  const badge = document.getElementById('status-badge');
+  badge.className = `status-badge ${state}`;
+  const labels = { idle: 'Idle', running: 'Running', done: 'Done', error: 'Error' };
+  badge.textContent = labels[state] || state;
+  if (title) document.getElementById('session-title').textContent = title;
+}
+
+function showOutput(text) {
+  const card = document.getElementById('output-card');
+  const out  = document.getElementById('output-text');
+  out.textContent = text;
+  card.classList.add('visible');
+  card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function clearOutput() {
+  document.getElementById('output-card').classList.remove('visible');
+  document.getElementById('output-text').textContent = '';
+  document.getElementById('error-box').classList.remove('visible');
+  document.getElementById('error-box').textContent = '';
+}
+
+function showError(msg) {
+  const box = document.getElementById('error-box');
+  box.textContent = `Error: ${msg}`;
+  box.classList.add('visible');
+}
+
+/* ── Copy ───────────────────────────────────────────────────────────── */
+function copyOutput() {
+  if (!outputText) return;
+  navigator.clipboard.writeText(outputText).then(() => {
+    const btn = document.getElementById('btn-copy');
+    btn.innerHTML = '<i class="ti ti-check" style="font-size:13px"></i> Copied';
+    setTimeout(() => {
+      btn.innerHTML = '<i class="ti ti-copy" style="font-size:13px"></i> Copy';
+    }, 2000);
+  });
+}
+
+/* ── Download ───────────────────────────────────────────────────────── */
+function downloadOutput() {
+  if (!outputText) return;
+  const fname = document.getElementById('filename-display').textContent || 'jason_output.txt';
+  const blob  = new Blob([outputText], { type: 'text/plain' });
+  const url   = URL.createObjectURL(blob);
+  const link  = document.createElement('a');
+  link.href     = url;
+  link.download = fname;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ── Boot ───────────────────────────────────────────────────────────── */
+updateSession();
+updateFilename();
+</script>
+</body>
+</html>
