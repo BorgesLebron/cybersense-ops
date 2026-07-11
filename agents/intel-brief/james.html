@@ -3,8 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/BorgesLebron/hectorborges-portfolio/main/assets/csicon.png">
-<link rel="apple-touch-icon" href="https://raw.githubusercontent.com/BorgesLebron/hectorborges-portfolio/main/assets/csicon.png">
 <title>Acquisition Editor — CyberSense Ops</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 <style>
@@ -327,9 +325,304 @@
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
   ::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
+
+  /* ══ Nav Drawer ══════════════════════════════════════════════════════ */
+  .nav-drawer-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(2px);
+    z-index: 900;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .nav-drawer-overlay.open { opacity: 1; pointer-events: all; }
+
+  .nav-drawer {
+    position: fixed; top: 0; left: 0; bottom: 0;
+    width: 320px;
+    background: var(--surface-1);
+    border-right: 1px solid var(--border);
+    z-index: 901;
+    display: flex; flex-direction: column;
+    transform: translateX(-100%);
+    transition: transform 0.22s cubic-bezier(0.4,0,0.2,1);
+    overflow: hidden;
+  }
+  .nav-drawer.open { transform: translateX(0); }
+
+  .nav-drawer-head {
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .nav-drawer-logo { display: flex; align-items: center; gap: 10px; }
+  .nav-drawer-logo-mark {
+    width: 30px; height: 30px; border-radius: 7px;
+    background: var(--brand); border: 1px solid var(--accent-border);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .nav-drawer-logo-mark span { color: var(--accent); font-size: 12px; font-weight: 700; }
+  .nav-drawer-title { font-size: 13px; font-weight: 600; }
+  .nav-drawer-sub   { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+
+  .nav-drawer-close {
+    width: 28px; height: 28px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    transition: background 0.1s;
+  }
+  .nav-drawer-close:hover { background: var(--surface-3); }
+
+  .nav-drawer-body { flex: 1; overflow-y: auto; padding: 12px; }
+
+  .nav-pipeline-label {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--text-muted);
+    padding: 8px 4px 6px;
+  }
+  .nav-pipeline-label:not(:first-child) { margin-top: 8px; }
+
+  .nav-agent-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 10px;
+    border-radius: var(--radius);
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-size: 13px;
+    transition: background 0.1s, color 0.1s;
+    cursor: pointer;
+    border: 1px solid transparent;
+  }
+  .nav-agent-row:hover:not(.nav-disabled) { background: var(--surface-2); color: var(--text-primary); }
+  .nav-agent-row.nav-active {
+    background: var(--accent-bg);
+    color: var(--accent);
+    border-color: var(--accent-border);
+  }
+  .nav-agent-row.nav-disabled { opacity: 0.4; cursor: default; pointer-events: none; }
+
+  .nav-agent-icon {
+    width: 28px; height: 28px; border-radius: 6px;
+    background: var(--surface-3); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; flex-shrink: 0; color: var(--text-muted);
+  }
+  .nav-agent-row.nav-active .nav-agent-icon {
+    background: var(--accent-bg); border-color: var(--accent-border); color: var(--accent);
+  }
+
+  .nav-agent-info { flex: 1; min-width: 0; }
+  .nav-agent-name { font-weight: 600; font-size: 13px; }
+  .nav-agent-role { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+  .nav-agent-row.nav-active .nav-agent-role { color: rgba(79,195,247,0.6); }
+
+  .nav-status-pip { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .pip-live    { background: var(--success); }
+  .pip-planned { background: var(--border-strong); }
+
+  .nav-drawer-foot {
+    padding: 12px; border-top: 1px solid var(--border); flex-shrink: 0;
+  }
+  .nav-drawer-foot-link {
+    display: flex; align-items: center; gap: 7px;
+    font-size: 12px; color: var(--text-muted); text-decoration: none;
+    padding: 7px 8px; border-radius: var(--radius);
+    transition: background 0.1s, color 0.1s;
+  }
+  .nav-drawer-foot-link:hover { background: var(--surface-2); color: var(--text-secondary); }
+
+  /* ── Top nav bar ── */
+  .top-nav {
+    position: fixed; top: 0; left: 0; right: 0; height: 42px;
+    background: var(--surface-1); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; padding: 0 16px; gap: 12px;
+    z-index: 800;
+  }
+  .top-nav-btn {
+    width: 30px; height: 30px; border-radius: var(--radius);
+    border: 1px solid var(--border); background: var(--surface-2);
+    color: var(--text-secondary); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; transition: background 0.1s, border-color 0.1s; flex-shrink: 0;
+  }
+  .top-nav-btn:hover { background: var(--surface-3); border-color: var(--border-strong); }
+
+  .top-nav-crumb {
+    font-size: 12px; color: var(--text-muted);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .top-nav-crumb a { color: var(--text-muted); text-decoration: none; }
+  .top-nav-crumb a:hover { color: var(--accent); }
+  .top-nav-crumb .crumb-current { color: var(--text-primary); font-weight: 600; }
+
+  .top-nav-agent-badge {
+    margin-left: auto; font-size: 11px; font-weight: 600;
+    padding: 3px 10px; border-radius: 12px;
+    background: var(--accent-bg); color: var(--accent);
+    border: 1px solid var(--accent-border); letter-spacing: 0.04em;
+  }
+
+  /* push body grid down by top-nav height */
+  body { padding-top: 42px; }
+
 </style>
 </head>
 <body>
+
+<!-- ══════════════════════════════════════════════════ NAV DRAWER -->
+<div class="nav-drawer-overlay" id="nav-overlay" onclick="closeNav()"></div>
+
+<nav class="nav-drawer" id="nav-drawer">
+  <div class="nav-drawer-head">
+    <div class="nav-drawer-logo">
+      <div class="nav-drawer-logo-mark"><span>CS</span></div>
+      <div>
+        <div class="nav-drawer-title">CyberSense Ops</div>
+        <div class="nav-drawer-sub">Agent Navigation</div>
+      </div>
+    </div>
+    <button class="nav-drawer-close" onclick="closeNav()">
+      <i class="ti ti-x"></i>
+    </button>
+  </div>
+
+  <div class="nav-drawer-body">
+    <div class="nav-pipeline-label">Intel Brief Pipeline</div>
+        <a class="nav-agent-row nav-active" href="/agents/intel-brief/james.html">
+          <div class="nav-agent-icon"><i class="ti ti-pencil"></i></div>
+          <div class="nav-agent-info">
+            <div class="nav-agent-name">James</div>
+            <div class="nav-agent-role">Acquisitions Editor</div>
+          </div>
+          <div class="nav-status-pip pip-live"></div>
+        </a>
+        <a class="nav-agent-row" href="/agents/intel-brief/jason.html">
+          <div class="nav-agent-icon"><i class="ti ti-file-text"></i></div>
+          <div class="nav-agent-info">
+            <div class="nav-agent-name">Jason</div>
+            <div class="nav-agent-role">Developmental Editor</div>
+          </div>
+          <div class="nav-status-pip pip-live"></div>
+        </a>
+        <span class="nav-agent-row nav-disabled" >
+          <div class="nav-agent-icon"><i class="ti ti-crown"></i></div>
+          <div class="nav-agent-info">
+            <div class="nav-agent-name">Rob</div>
+            <div class="nav-agent-role">Editor in Chief</div>
+          </div>
+          <div class="nav-status-pip pip-planned"></div>
+        </span>
+        <span class="nav-agent-row nav-disabled" >
+          <div class="nav-agent-icon"><i class="ti ti-photo"></i></div>
+          <div class="nav-agent-info">
+            <div class="nav-agent-name">Maya</div>
+            <div class="nav-agent-role">Graphic Designer</div>
+          </div>
+          <div class="nav-status-pip pip-planned"></div>
+        </span>
+        <span class="nav-agent-row nav-disabled" >
+          <div class="nav-agent-icon"><i class="ti ti-layout"></i></div>
+          <div class="nav-agent-info">
+            <div class="nav-agent-name">Mary</div>
+            <div class="nav-agent-role">UI Developer</div>
+          </div>
+          <div class="nav-status-pip pip-planned"></div>
+        </span>
+        <span class="nav-agent-row nav-disabled" >
+          <div class="nav-agent-icon"><i class="ti ti-upload"></i></div>
+          <div class="nav-agent-info">
+            <div class="nav-agent-name">Ethan</div>
+            <div class="nav-agent-role">Publisher</div>
+          </div>
+          <div class="nav-status-pip pip-planned"></div>
+        </span>
+    <div class="nav-pipeline-label">Daily Brief Pipeline</div>
+        <span class="nav-agent-row nav-disabled" >
+          <div class="nav-agent-icon"><i class="ti ti-pencil"></i></div>
+          <div class="nav-agent-info">
+            <div class="nav-agent-name">Ruth</div>
+            <div class="nav-agent-role">Acquisitions Editor</div>
+          </div>
+          <div class="nav-status-pip pip-planned"></div>
+        </span>
+        <span class="nav-agent-row nav-disabled" >
+          <div class="nav-agent-icon"><i class="ti ti-file-text"></i></div>
+          <div class="nav-agent-info">
+            <div class="nav-agent-name">Peter</div>
+            <div class="nav-agent-role">Developmental Editor</div>
+          </div>
+          <div class="nav-status-pip pip-planned"></div>
+        </span>
+        <span class="nav-agent-row nav-disabled" >
+          <div class="nav-agent-icon"><i class="ti ti-crown"></i></div>
+          <div class="nav-agent-info">
+            <div class="nav-agent-name">Ed</div>
+            <div class="nav-agent-role">Editor in Chief</div>
+          </div>
+          <div class="nav-status-pip pip-planned"></div>
+        </span>
+        <span class="nav-agent-row nav-disabled" >
+          <div class="nav-agent-icon"><i class="ti ti-layout"></i></div>
+          <div class="nav-agent-info">
+            <div class="nav-agent-name">Kirby</div>
+            <div class="nav-agent-role">UI Developer</div>
+          </div>
+          <div class="nav-status-pip pip-planned"></div>
+        </span>
+        <span class="nav-agent-row nav-disabled" >
+          <div class="nav-agent-icon"><i class="ti ti-upload"></i></div>
+          <div class="nav-agent-info">
+            <div class="nav-agent-name">Lucy</div>
+            <div class="nav-agent-role">Publisher</div>
+          </div>
+          <div class="nav-status-pip pip-planned"></div>
+        </span>
+  </div>
+
+  <div class="nav-drawer-foot">
+    <a class="nav-drawer-foot-link" href="/">
+      <i class="ti ti-layout-dashboard" style="font-size:14px"></i> Ops Dashboard
+    </a>
+    <a class="nav-drawer-foot-link" href="https://cybersense.solutions" target="_blank">
+      <i class="ti ti-external-link" style="font-size:14px"></i> cybersense.solutions
+    </a>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════════════ TOP NAV BAR -->
+<div class="top-nav">
+  <button class="top-nav-btn" onclick="openNav()" title="Navigate agents">
+    <i class="ti ti-menu-2"></i>
+  </button>
+  <div class="top-nav-crumb">
+    <a href="/">Ops</a>
+    <i class="ti ti-chevron-right crumb-sep" style="font-size:10px;color:var(--text-muted)"></i>
+    <span class="crumb-current">James — Acquisitions Editor</span>
+  </div>
+  <div class="top-nav-agent-badge">Intel Brief · Stage 1</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ NAV SCRIPT -->
+<script>
+function openNav()  {
+  document.getElementById('nav-drawer').classList.add('open');
+  document.getElementById('nav-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeNav() {
+  document.getElementById('nav-drawer').classList.remove('open');
+  document.getElementById('nav-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeNav(); });
+</script>
+
 
 <!-- ═══════════════════════════════════════════
      SIDEBAR
