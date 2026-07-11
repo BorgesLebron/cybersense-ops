@@ -10,7 +10,7 @@ app.use(express.json({ limit: '10mb' }));
 // ── Static files ──────────────────────────────────────────────────────────────
 app.use(express.static(path.join(__dirname)));
 
-// ── API proxy — /api/brief ────────────────────────────────────────────────────
+// ── API proxy — /api/brief → Anthropic ───────────────────────────────────────
 app.post('/api/brief', async (req, res) => {
   const apiKey = process.env.ANTHROPIC_API_KEY;
 
@@ -38,6 +38,37 @@ app.post('/api/brief', async (req, res) => {
     console.error('Anthropic API error:', err);
     return res.status(502).json({
       error: { message: 'Failed to reach Anthropic API.' }
+    });
+  }
+});
+
+// ── API proxy — /api/image → OpenAI gpt-image-2 ──────────────────────────────
+app.post('/api/image', async (req, res) => {
+  const apiKey = process.env.OPENAI_API_KEY;
+
+  if (!apiKey) {
+    return res.status(500).json({
+      error: { message: 'OPENAI_API_KEY is not configured on the server.' }
+    });
+  }
+
+  try {
+    const response = await fetch('https://api.openai.com/v1/images/generations', {
+      method: 'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify(req.body)
+    });
+
+    const data = await response.json();
+    return res.status(response.status).json(data);
+
+  } catch (err) {
+    console.error('OpenAI Image API error:', err);
+    return res.status(502).json({
+      error: { message: 'Failed to reach OpenAI Image API.' }
     });
   }
 });
