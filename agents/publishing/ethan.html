@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/BorgesLebron/hectorborges-portfolio/main/assets/csicon.png">
+<link rel="apple-touch-icon" href="https://raw.githubusercontent.com/BorgesLebron/hectorborges-portfolio/main/assets/csicon.png">
+<title>Ethan — Publisher | CyberSense Ops</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0d1117;--surface-1:#161b22;--surface-2:#1c2128;--surface-3:#21262d;
+    --border:#30363d;--border-strong:#484f58;
+    --text-primary:#e6edf3;--text-secondary:#8b949e;--text-muted:#484f58;
+    --accent:#ff7b72;--accent-bg:rgba(255,123,114,0.08);--accent-border:rgba(255,123,114,0.3);
+    --success:#3fb950;--success-bg:rgba(63,185,80,0.08);
+    --danger:#f85149;--danger-bg:rgba(248,81,73,0.08);
+    --brand:#1a1a2e;--radius:6px;
+    --font-sans:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    --font-mono:'SF Mono','Fira Code',monospace;
+  }
+  .nav-drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(2px);z-index:900;opacity:0;pointer-events:none;transition:opacity 0.2s}.nav-drawer-overlay.open{opacity:1;pointer-events:all}
+  .nav-drawer{position:fixed;top:0;left:0;bottom:0;width:320px;background:var(--surface-1);border-right:1px solid var(--border);z-index:901;display:flex;flex-direction:column;transform:translateX(-100%);transition:transform 0.22s cubic-bezier(0.4,0,0.2,1);overflow:scroll}.nav-drawer.open{transform:translateX(0)}
+  .nav-drawer-head{padding:16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+  .nav-drawer-logo{display:flex;align-items:center;gap:10px}.nav-drawer-logo-mark{width:30px;height:30px;border-radius:7px;background:var(--brand);border:1px solid var(--accent-border);display:flex;align-items:center;justify-content:center}.nav-drawer-logo-mark span{color:var(--accent);font-size:12px;font-weight:700}.nav-drawer-title{font-size:13px;font-weight:600}.nav-drawer-sub{font-size:11px;color:var(--text-muted);margin-top:1px}
+  .nav-drawer-close{width:28px;height:28px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface-2);color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:background 0.1s}.nav-drawer-close:hover{background:var(--surface-3)}
+  .nav-drawer-body{flex:1;overflow-y:auto;padding:12px}.nav-pipeline-label{font-size:10px;font-weight:600;letter-spacing:0.09em;text-transform:uppercase;color:var(--text-muted);padding:8px 4px 6px}.nav-pipeline-label:not(:first-child){margin-top:8px}
+  .nav-agent-row{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius);text-decoration:none;color:var(--text-secondary);font-size:13px;transition:background 0.1s,color 0.1s;cursor:pointer;border:1px solid transparent}.nav-agent-row:hover:not(.nav-disabled){background:var(--surface-2);color:var(--text-primary)}.nav-agent-row.nav-active{background:var(--accent-bg);color:var(--accent);border-color:var(--accent-border)}.nav-agent-row.nav-disabled{opacity:0.4;cursor:default;pointer-events:none}
+  .nav-agent-icon{width:28px;height:28px;border-radius:6px;background:var(--surface-3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;color:var(--text-muted)}.nav-agent-row.nav-active .nav-agent-icon{background:var(--accent-bg);border-color:var(--accent-border);color:var(--accent)}
+  .nav-agent-info{flex:1;min-width:0}.nav-agent-name{font-weight:600;font-size:13px}.nav-agent-role{font-size:11px;color:var(--text-muted);margin-top:1px}
+  .nav-status-pip{width:7px;height:7px;border-radius:50%;flex-shrink:0}.pip-live{background:var(--success)}.pip-planned{background:var(--border-strong)}
+  .nav-drawer-foot{padding:12px;border-top:1px solid var(--border);flex-shrink:0}.nav-drawer-foot-link{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text-muted);text-decoration:none;padding:7px 8px;border-radius:var(--radius);transition:background 0.1s,color 0.1s}.nav-drawer-foot-link:hover{background:var(--surface-2);color:var(--text-secondary)}
+  .top-nav{position:fixed;top:0;left:0;right:0;height:42px;background:var(--surface-1);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:12px;z-index:800}
+  .top-nav-btn{width:30px;height:30px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface-2);color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}.top-nav-btn:hover{background:var(--surface-3)}
+  .top-nav-crumb{font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:6px}.top-nav-crumb a{color:var(--text-muted);text-decoration:none}.top-nav-crumb a:hover{color:var(--accent)}.top-nav-crumb .crumb-current{color:var(--text-primary);font-weight:600}
+  .top-nav-agent-badge{margin-left:auto;font-size:11px;font-weight:600;padding:3px 10px;border-radius:12px;background:var(--accent-bg);color:var(--accent);border:1px solid var(--accent-border);letter-spacing:0.04em}
+  body{
+    padding-top:42px;
+    font-family:var(--font-sans);
+    background:var(--bg);
+    color:var(--text-primary);
+    min-height:100vh;
+    display:grid;
+    grid-template-columns:260px 1fr;
+    grid-template-rows:calc(300vh - 42px);
+    overflow:scroll
+  }
+  .sidebar{background:var(--surface-1);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:scroll}
+  .sidebar-head{padding:16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0}
+  .logo-mark{width:32px;height:32px;border-radius:8px;background:var(--brand);border:1px solid var(--accent-border);display:flex;align-items:center;justify-content:center;flex-shrink:0}.logo-mark span{color:var(--accent);font-size:13px;font-weight:700}.pub-name{font-size:13px;font-weight:600}.pub-sub{font-size:11px;color:var(--text-muted);margin-top:1px}
+  .agent-card{margin:12px;padding:12px;background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:var(--radius);flex-shrink:0}
+  .agent-name{font-size:13px;font-weight:700;color:var(--accent);display:flex;align-items:center;gap:6px}.agent-role{font-size:11px;color:var(--text-secondary);margin-top:3px}
+  .pipeline-badge{font-size:10px;font-weight:600;letter-spacing:0.07em;background:var(--surface-3);color:var(--text-muted);border:1px solid var(--border);border-radius:4px;padding:2px 6px;margin-top:8px;display:inline-block}
+  .pipeline-label{font-size:10px;color:var(--text-muted);padding:14px 16px 6px;letter-spacing:0.08em;text-transform:uppercase;flex-shrink:0}
+  .pipeline-steps{padding:0 12px;flex-shrink:0}.step{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:var(--radius);font-size:12px;color:var(--text-muted)}.step.active{color:var(--accent);background:var(--accent-bg)}.step.done{color:var(--success)}.step-dot{width:8px;height:8px;border-radius:50%;background:var(--border-strong);flex-shrink:0}.step.active .step-dot{background:var(--accent)}.step.done .step-dot{background:var(--success)}}
+  .session-section{margin:0 12px 12px;padding:10px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);flex-shrink:0}.session-row{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--text-secondary);margin-bottom:4px}.session-row:last-child{margin-bottom:0}.session-val{color:var(--text-primary);font-weight:500}
+  .status-badge{font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px}.status-badge.idle{background:var(--surface-3);color:var(--text-muted)}.status-badge.running{background:var(--accent-bg);color:var(--accent)}.status-badge.done{background:var(--success-bg);color:var(--success)}.status-badge.error{background:var(--danger-bg);color:var(--danger)}
+  .sidebar-spacer{flex:1}.sidebar-footer{padding:12px;border-top:1px solid var(--border);flex-shrink:0}.footer-link{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted);text-decoration:none;padding:5px 6px;border-radius:var(--radius);transition:background 0.1s,color 0.1s}.footer-link:hover{background:var(--surface-2);color:var(--text-secondary)}
+  .main{display:flex;flex-direction:column;overflow:scroll}
+  .topbar{padding:14px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+  .topbar-title{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px}
+  .topbar-title i{color:var(--accent);font-size:16px}
+  .topbar-meta{font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:14px}
+  .content-area{flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:16px}
+  .card{background:var(--surface-1);border:1px solid var(--border);border-radius:var(--radius);overflow:scroll}
+  .card-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .card-title{font-size:12px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.07em;display:flex;align-items:center;gap:6px}
+  .card-title i{font-size:14px}
+  .card-body{padding:16px}
+  .field{margin-bottom:14px}
+  .field:last-child{margin-bottom:0}
+  .field-label{font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;display:flex;align-items:center;gap:5px}
+  .field-hint{font-size:11px;color:var(--text-muted);margin-top:4px}
+  .field input[type=text]{width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-size:13px;padding:8px 10px;outline:none;transition:border-color 0.15s;font-family:var(--font-sans)}.field input[type=text]:focus{border-color:var(--accent)}.field input[type=text]::placeholder{color:var(--text-muted)}.field input.mono{font-family:var(--font-mono);font-size:12px}
+  textarea{width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-size:12px;font-family:var(--font-mono);line-height:1.6;padding:10px 12px;outline:none;resize:vertical;transition:border-color 0.15s}textarea:focus{border-color:var(--accent)}textarea::placeholder{color:var(--text-muted);font-family:var(--font-sans);font-size:13px}
+  .upload-zone{border:1px dashed var(--border-strong);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:border-color 0.15s,background 0.15s;position:relative}.upload-zone:hover{border-color:var(--accent);background:var(--accent-bg)}.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}.upload-zone-icon{color:var(--text-muted);font-size:18px;flex-shrink:0}.upload-zone-text{font-size:12px;color:var(--text-secondary)}.upload-zone-text strong{color:var(--text-primary)}.upload-zone-sub{font-size:11px;color:var(--text-muted);margin-top:2px}.upload-loaded{background:var(--success-bg);border-color:rgba(63,185,80,0.3)}.upload-loaded .upload-zone-icon{color:var(--success)}.upload-loaded .upload-zone-text strong{color:var(--success)}
+  /* Article slot grid */
+  .slot-grid{display:flex;flex-direction:column;gap:12px}
+  .slot{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px}
+  .slot-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+  .slot-badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;letter-spacing:0.06em;white-space:nowrap}
+  .slot-badge.hero-main{background:rgba(255,123,114,0.15);color:#ff7b72;border:1px solid rgba(255,123,114,0.35)}
+  .slot-badge.hero-side{background:rgba(255,166,77,0.15);color:#ffa64d;border:1px solid rgba(255,166,77,0.35)}
+  .slot-badge.dig{background:rgba(79,195,247,0.12);color:#4fc3f7;border:1px solid rgba(79,195,247,0.3)}
+  .slot-desc{font-size:11px;color:var(--text-muted)}
+  .slot-fields{display:flex;flex-direction:column;gap:8px}
+  .slot-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .slot input[type=text]{width:100%;background:var(--surface-1);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-size:12px;padding:6px 9px;outline:none;transition:border-color 0.15s;font-family:var(--font-sans)}.slot input[type=text]:focus{border-color:var(--accent)}.slot input[type=text]::placeholder{color:var(--text-muted)}
+  .slot textarea{font-size:12px;padding:7px 9px;min-height:60px}
+  /* Severity */
+  .sev-group{display:flex;gap:5px;flex-wrap:wrap}
+  .sev-btn{font-size:10px;font-weight:600;padding:3px 9px;border-radius:10px;border:1px solid var(--border);background:var(--surface-1);color:var(--text-muted);cursor:pointer;transition:all 0.1s}
+  .sev-btn.active-CRITICAL{background:rgba(248,81,73,0.15);border-color:#f85149;color:#f85149}
+  .sev-btn.active-HIGH{background:rgba(210,153,34,0.15);border-color:#d29922;color:#d29922}
+  .sev-btn.active-MEDIUM{background:rgba(79,195,247,0.15);border-color:#4fc3f7;color:#4fc3f7}
+  .sev-btn.active-LOW{background:rgba(63,185,80,0.15);border-color:#3fb950;color:#3fb950}
+  .sev-btn.active-INFO{background:var(--surface-3);border-color:var(--border-strong);color:var(--text-secondary)}
+  /* Generate */
+  .btn-generate{width:100%;padding:10px 16px;background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:var(--radius);color:var(--accent);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background 0.1s}.btn-generate:hover:not(:disabled){background:rgba(255,123,114,0.14)}.btn-generate:disabled{opacity:0.4;cursor:not-allowed}
+  .spinner{width:14px;height:14px;border:2px solid var(--accent-border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite;display:none}@keyframes spin{to{transform:rotate(360deg)}}
+  .output-card{background:var(--surface-1);border:1px solid var(--border);border-radius:var(--radius);overflow:scroll;display:none}
+  .output-card.visible{display:block}
+  .output-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .output-label{font-size:12px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.07em;display:flex;align-items:center;gap:6px}
+  .output-actions{display:flex;gap:8px}
+  .btn-action{font-size:11px;font-weight:600;padding:5px 10px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface-2);color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;gap:5px;transition:background 0.1s}.btn-action:hover{background:var(--surface-3)}.btn-action.primary{background:var(--accent-bg);border-color:var(--accent-border);color:var(--accent)}.btn-action.primary:hover{background:rgba(255,123,114,0.14)}
+  .output-filename{padding:8px 16px;background:var(--surface-2);border-bottom:1px solid var(--border);font-size:11px;font-family:var(--font-mono);color:var(--text-muted);display:flex;align-items:center;gap:6px}
+  .output-body{padding:16px;max-height:400px;overflow-y:auto}
+  .output-text{font-family:var(--font-mono);font-size:11px;line-height:1.6;color:var(--text-secondary);white-space:pre-wrap;word-break:break-word}
+  .error-box{background:var(--danger-bg);border:1px solid rgba(248,81,73,0.3);border-radius:var(--radius);padding:12px 14px;font-size:12px;color:var(--danger);display:none}.error-box.visible{display:block}
+  .info-callout{background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:var(--radius);padding:10px 14px;font-size:12px;color:var(--text-secondary);display:flex;align-items:flex-start;gap:8px}
+  .info-callout i{color:var(--accent);font-size:14px;flex-shrink:0;margin-top:1px}
+  .warn-callout{background:rgba(210,153,34,0.08);border:1px solid rgba(210,153,34,0.3);border-radius:var(--radius);padding:10px 14px;font-size:12px;color:#d29922;display:flex;align-items:flex-start;gap:8px}.warn-callout i{font-size:14px;flex-shrink:0;margin-top:1px}
+  ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:3px}
+</style>
+</head>
+<body>
+
+<!-- NAV DRAWER -->
+<div class="nav-drawer-overlay" id="nav-overlay" onclick="closeNav()"></div>
+<nav class="nav-drawer" id="nav-drawer">
+  <div class="nav-drawer-head"><div class="nav-drawer-logo"><div class="nav-drawer-logo-mark"><span>CS</span></div><div><div class="nav-drawer-title">CyberSense Ops</div><div class="nav-drawer-sub">Agent Navigation</div></div></div><button class="nav-drawer-close" onclick="closeNav()"><i class="ti ti-x"></i></button></div>
+  <div class="nav-drawer-body">
+    <div class="nav-pipeline-label">Intel Brief Pipeline</div>
+    <a class="nav-agent-row" href="/agents/intel-brief/james.html"><div class="nav-agent-icon"><i class="ti ti-pencil"></i></div><div class="nav-agent-info"><div class="nav-agent-name">James</div><div class="nav-agent-role">Acquisitions Editor</div></div><div class="nav-status-pip pip-live"></div></a>
+    <a class="nav-agent-row" href="/agents/intel-brief/jason.html"><div class="nav-agent-icon"><i class="ti ti-file-text"></i></div><div class="nav-agent-info"><div class="nav-agent-name">Jason</div><div class="nav-agent-role">Developmental Editor</div></div><div class="nav-status-pip pip-live"></div></a>
+    <a class="nav-agent-row" href="/agents/intel-brief/rob.html"><div class="nav-agent-icon"><i class="ti ti-crown"></i></div><div class="nav-agent-info"><div class="nav-agent-name">Rob</div><div class="nav-agent-role">Editor in Chief</div></div><div class="nav-status-pip pip-live"></div></a>
+    <a class="nav-agent-row" href="/agents/design/maya.html"><div class="nav-agent-icon"><i class="ti ti-photo"></i></div><div class="nav-agent-info"><div class="nav-agent-name">Maya</div><div class="nav-agent-role">Graphic Designer</div></div><div class="nav-status-pip pip-live"></div></a>
+    <a class="nav-agent-row" href="/agents/publishing/mary.html"><div class="nav-agent-icon"><i class="ti ti-layout"></i></div><div class="nav-agent-info"><div class="nav-agent-name">Mary</div><div class="nav-agent-role">UI Developer</div></div><div class="nav-status-pip pip-live"></div></a>
+    <a class="nav-agent-row nav-active" href="/agents/publishing/ethan.html"><div class="nav-agent-icon"><i class="ti ti-upload"></i></div><div class="nav-agent-info"><div class="nav-agent-name">Ethan</div><div class="nav-agent-role">Publisher</div></div><div class="nav-status-pip pip-live"></div></a>
+    <div class="nav-pipeline-label">Daily Brief Pipeline</div>
+    <a class="nav-agent-row" href="/agents/daily-brief/ruth.html"><div class="nav-agent-icon"><i class="ti ti-pencil"></i></div><div class="nav-agent-info"><div class="nav-agent-name">Ruth</div><div class="nav-agent-role">Acquisitions Editor</div></div><div class="nav-status-pip pip-live"></div></a>
+    <a class="nav-agent-row" href="/agents/daily-brief/peter.html"><div class="nav-agent-icon"><i class="ti ti-file-text"></i></div><div class="nav-agent-info"><div class="nav-agent-name">Peter</div><div class="nav-agent-role">Developmental Editor</div></div><div class="nav-status-pip pip-live"></div></a>
+    <a class="nav-agent-row" href="/agents/daily-brief/ed.html"><div class="nav-agent-icon"><i class="ti ti-crown"></i></div><div class="nav-agent-info"><div class="nav-agent-name">Ed</div><div class="nav-agent-role">Editor in Chief</div></div><div class="nav-status-pip pip-live"></div></a>
+    <a class="nav-agent-row" href="/agents/publishing/kirby.html"><div class="nav-agent-icon"><i class="ti ti-layout"></i></div><div class="nav-agent-info"><div class="nav-agent-name">Kirby</div><div class="nav-agent-role">UI Developer</div></div><div class="nav-status-pip pip-live"></div></a>
+    <span class="nav-agent-row nav-disabled"><div class="nav-agent-icon"><i class="ti ti-upload"></i></div><div class="nav-agent-info"><div class="nav-agent-name">Lucy</div><div class="nav-agent-role">Publisher</div></div><div class="nav-status-pip pip-planned"></div></span>
+  </div>
+  <div class="nav-drawer-foot"><a class="nav-drawer-foot-link" href="/"><i class="ti ti-layout-dashboard" style="font-size:14px"></i> Ops Dashboard</a><a class="nav-drawer-foot-link" href="https://cybersense.solutions" target="_blank"><i class="ti ti-external-link" style="font-size:14px"></i> cybersense.solutions</a></div>
+</nav>
+
+<!-- TOP NAV -->
+<div class="top-nav">
+  <button class="top-nav-btn" onclick="openNav()"><i class="ti ti-menu-2"></i></button>
+  <div class="top-nav-crumb"><a href="/">Ops</a><i class="ti ti-chevron-right" style="font-size:10px;color:var(--text-muted)"></i><span class="crumb-current">Ethan — Publisher</span></div>
+  <div class="top-nav-agent-badge">Intel Brief · Stage 6</div>
+</div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-head"><div class="logo-mark"><span>CS</span></div><div><div class="pub-name">CyberSense Ops</div><div class="pub-sub">Intel Brief Pipeline</div></div></div>
+  <div class="agent-card"><div class="agent-name"><i class="ti ti-upload"></i> Ethan</div><div class="agent-role">Publisher — intel.html</div><div class="pipeline-badge">INTEL BRIEF · STAGE 6 OF 6</div></div>
+  <div class="pipeline-label">Pipeline Stages</div>
+  <div class="pipeline-steps">
+    <div class="step done"><div class="step-dot"></div><span>James — Acquisitions Editor</span></div>
+    <div class="step done"><div class="step-dot"></div><span>Jason — Developmental Editor</span></div>
+    <div class="step done"><div class="step-dot"></div><span>Rob — Editor in Chief</span></div>
+    <div class="step done"><div class="step-dot"></div><span>Maya — Graphic Designer</span></div>
+    <div class="step done"><div class="step-dot"></div><span>Mary — UI Developer</span></div>
+    <div class="step active"><div class="step-dot"></div><span>Ethan — Publisher</span></div>
+  </div>
+  <div class="pipeline-label" style="margin-top:12px;">Session</div>
+  <div class="session-section">
+    <div class="session-row"><span>Status</span><span class="status-badge idle" id="status-badge">Idle</span></div>
+    <div class="session-row"><span>Threat articles</span><span class="session-val">3 slots</span></div>
+    <div class="session-row"><span>DIG articles</span><span class="session-val">2 slots</span></div>
+    <div class="session-row"><span>Output</span><span class="session-val">intel.html</span></div>
+  </div>
+  <div class="sidebar-spacer"></div>
+  <div class="sidebar-footer">
+    <a class="footer-link" href="/agents/publishing/mary.html"><i class="ti ti-arrow-left" style="font-size:13px"></i> Back to Mary</a>
+    <a class="footer-link" href="/" style="margin-top:2px;"><i class="ti ti-layout-dashboard" style="font-size:13px"></i> Ops Dashboard</a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title"><i class="ti ti-upload"></i> Publisher — intel.html Index Updater</div>
+    <div class="topbar-meta"><span>Rotates Hero → News</span><span>Prepends DIG</span><span>Stage 6 of 6</span></div>
+  </div>
+  <div class="content-area">
+
+    <div class="info-callout"><i class="ti ti-rotate-clockwise"></i><span>Upload the current <code style="font-family:var(--font-mono);font-size:11px;">intel.html</code>, fill in the new articles, and Ethan rotates the Hero cards down to Latest News, inserts the new Hero, and prepends the DIG cards. Download and commit.</span></div>
+
+    <div class="warn-callout"><i class="ti ti-alert-triangle"></i><span><strong>Manual gate:</strong> Review the output before committing to GitHub. Ethan produces the file — you authorize the push.</span></div>
+
+    <!-- intel.html upload -->
+    <div class="card">
+      <div class="card-header"><div class="card-title"><i class="ti ti-file-import"></i> Current intel.html</div></div>
+      <div class="card-body">
+        <div class="field" style="margin-bottom:0;">
+          <div class="upload-zone" id="upload-intel">
+            <input type="file" accept=".html" id="file-intel" onchange="loadIntel(this)">
+            <div class="upload-zone-icon"><i class="ti ti-file-code"></i></div>
+            <div><div class="upload-zone-text"><strong>Upload current intel.html</strong></div><div class="upload-zone-sub">from cybersense-solutions repo</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- New Threat Intel articles -->
+    <div class="card">
+      <div class="card-header"><div class="card-title"><i class="ti ti-shield-exclamation"></i> New Threat Intel Articles</div><span style="font-size:11px;color:var(--text-muted)">Replace current Hero grid</span></div>
+      <div class="card-body">
+        <div class="slot-grid">
+
+          <!-- HERO MAIN -->
+          <div class="slot" id="slot-main">
+            <div class="slot-header">
+              <span class="slot-badge hero-main">Hero Main</span>
+              <span class="slot-desc">Large featured card — lead article of the day</span>
+            </div>
+            <div class="slot-fields">
+              <input type="text" id="main-title" placeholder="Full article title">
+              <div class="slot-row">
+                <input type="text" id="main-url" placeholder="https://cybersense.solutions/articles/2026/Jul/YYYYMMDD-Slug.html">
+                <input type="text" id="main-banner" placeholder="banners/SlugHere.png">
+              </div>
+              <div class="slot-row">
+                <input type="text" id="main-date" placeholder="Published July 11, 2026">
+                <div class="sev-group" id="main-sev">
+                  <button class="sev-btn active-CRITICAL" onclick="setSev('main','CRITICAL')">CRIT</button>
+                  <button class="sev-btn" onclick="setSev('main','HIGH')">HIGH</button>
+                  <button class="sev-btn" onclick="setSev('main','MEDIUM')">MED</button>
+                  <button class="sev-btn" onclick="setSev('main','LOW')">LOW</button>
+                  <button class="sev-btn" onclick="setSev('main','INFO')">INFO</button>
+                </div>
+              </div>
+              <input type="text" id="main-tags" placeholder="Tag1, Tag2, Tag3, Tag4 (comma separated)">
+              <textarea id="main-excerpt" rows="3" placeholder="Executive summary excerpt (2–3 sentences for the hero card)…"></textarea>
+              <input type="text" id="main-keyfinding" placeholder="Key Finding statement (bold line under excerpt)">
+            </div>
+          </div>
+
+          <!-- HERO SIDE TOP -->
+          <div class="slot" id="slot-side1">
+            <div class="slot-header">
+              <span class="slot-badge hero-side">Hero Side Top</span>
+              <span class="slot-desc">Right column, upper card</span>
+            </div>
+            <div class="slot-fields">
+              <input type="text" id="side1-title" placeholder="Full article title">
+              <div class="slot-row">
+                <input type="text" id="side1-url" placeholder="https://cybersense.solutions/articles/...">
+                <input type="text" id="side1-banner" placeholder="banners/SlugHere.png">
+              </div>
+              <div class="slot-row">
+                <input type="text" id="side1-date" placeholder="Published July 11, 2026">
+              </div>
+              <input type="text" id="side1-tags" placeholder="Tag1, Tag2, Tag3 (comma separated)">
+              <textarea id="side1-excerpt" rows="2" placeholder="Short excerpt (1–2 sentences)…"></textarea>
+            </div>
+          </div>
+
+          <!-- HERO SIDE BOTTOM -->
+          <div class="slot" id="slot-side2">
+            <div class="slot-header">
+              <span class="slot-badge hero-side">Hero Side Bottom</span>
+              <span class="slot-desc">Right column, lower card</span>
+            </div>
+            <div class="slot-fields">
+              <input type="text" id="side2-title" placeholder="Full article title">
+              <div class="slot-row">
+                <input type="text" id="side2-url" placeholder="https://cybersense.solutions/articles/...">
+                <input type="text" id="side2-banner" placeholder="banners/SlugHere.png">
+              </div>
+              <div class="slot-row">
+                <input type="text" id="side2-date" placeholder="Published July 11, 2026">
+              </div>
+              <input type="text" id="side2-tags" placeholder="Tag1, Tag2, Tag3 (comma separated)">
+              <textarea id="side2-excerpt" rows="2" placeholder="Short excerpt (1–2 sentences)…"></textarea>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- New DIG articles -->
+    <div class="card">
+      <div class="card-header"><div class="card-title"><i class="ti ti-bulb"></i> New DIG Articles</div><span style="font-size:11px;color:var(--text-muted)">Prepended to DIG sidebar</span></div>
+      <div class="card-body">
+        <div class="slot-grid">
+
+          <div class="slot">
+            <div class="slot-header"><span class="slot-badge dig">DIG 1</span><span class="slot-desc">Newest DIG — prepended first</span></div>
+            <div class="slot-fields">
+              <input type="text" id="dig1-title" placeholder="Full DIG article title">
+              <div class="slot-row">
+                <input type="text" id="dig1-url" placeholder="https://cybersense.solutions/articles/...">
+                <input type="text" id="dig1-banner" placeholder="banners/SlugHere.png">
+              </div>
+              <input type="text" id="dig1-date" placeholder="Published: July 11, 2026">
+              <textarea id="dig1-excerpt" rows="2" placeholder="Short excerpt for DIG card…"></textarea>
+            </div>
+          </div>
+
+          <div class="slot">
+            <div class="slot-header"><span class="slot-badge dig">DIG 2</span><span class="slot-desc">Second newest DIG</span></div>
+            <div class="slot-fields">
+              <input type="text" id="dig2-title" placeholder="Full DIG article title">
+              <div class="slot-row">
+                <input type="text" id="dig2-url" placeholder="https://cybersense.solutions/articles/...">
+                <input type="text" id="dig2-banner" placeholder="banners/SlugHere.png">
+              </div>
+              <input type="text" id="dig2-date" placeholder="Published: July 11, 2026">
+              <textarea id="dig2-excerpt" rows="2" placeholder="Short excerpt for DIG card…"></textarea>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Generate -->
+    <button class="btn-generate" id="btn-generate" onclick="runEthan()">
+      <div class="spinner" id="spinner"></div>
+      <i class="ti ti-rotate-clockwise" id="btn-icon" style="font-size:15px"></i>
+      <span id="btn-label">Rotate &amp; Update intel.html</span>
+    </button>
+
+    <div class="error-box" id="error-box"></div>
+
+    <div class="output-card" id="output-card">
+      <div class="output-header">
+        <div class="output-label"><i class="ti ti-circle-check"></i> Updated intel.html — Ready to Commit</div>
+        <div class="output-actions">
+          <button class="btn-action primary" onclick="downloadOutput()"><i class="ti ti-download" style="font-size:13px"></i> Download intel.html</button>
+        </div>
+      </div>
+      <div class="output-filename"><i class="ti ti-file-code"></i><span>intel.html</span><span style="margin-left:auto;color:var(--text-muted);font-size:10px;">→ cybersense-solutions/ root</span></div>
+      <div class="output-body"><div class="output-text" id="output-text"></div></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+let intelHTML = '';
+let outputHTML = '';
+const sevState = { main: 'CRITICAL' };
+
+function loadIntel(input) {
+  const file = input.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    intelHTML = e.target.result;
+    const zone = document.getElementById('upload-intel');
+    zone.classList.add('upload-loaded');
+    zone.querySelector('.upload-zone-text strong').textContent = file.name;
+    zone.querySelector('.upload-zone-sub').textContent = `Loaded — ${intelHTML.length.toLocaleString()} chars`;
+    setStatus('idle');
+  };
+  reader.readAsText(file);
+}
+
+function setSev(slot, sev) {
+  sevState[slot] = sev;
+  document.querySelectorAll(`#main-sev .sev-btn`).forEach(b => {
+    const label = b.textContent;
+    const map = {CRITICAL:'CRIT',HIGH:'HIGH',MEDIUM:'MED',LOW:'LOW',INFO:'INFO'};
+    b.className = 'sev-btn' + (map[sev] === label ? ` active-${sev}` : '');
+  });
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function tagsHTML(tagStr) {
+  return (tagStr||'').split(',').map(t => t.trim()).filter(Boolean)
+    .map(t => `<span class="cs-tag">${esc(t)}</span>`).join('\n          ');
+}
+
+function val(id) { return document.getElementById(id)?.value?.trim() || ''; }
+
+function runEthan() {
+  if(!intelHTML) { alert('Upload the current intel.html first.'); return; }
+
+  // Validate required fields
+  const required = ['main-title','main-url','main-banner','main-date','main-excerpt',
+                    'side1-title','side1-url','side1-banner','side1-date','side1-excerpt',
+                    'side2-title','side2-url','side2-banner','side2-date','side2-excerpt',
+                    'dig1-title','dig1-url','dig1-banner','dig1-date','dig1-excerpt',
+                    'dig2-title','dig2-url','dig2-banner','dig2-date','dig2-excerpt'];
+  const missing = required.filter(id => !val(id));
+  if(missing.length) { showError(`Missing required fields: ${missing.join(', ')}`); return; }
+
+  setRunning(true);
+  document.getElementById('output-card').classList.remove('visible');
+  document.getElementById('error-box').classList.remove('visible');
+
+  try {
+    // ── Build new Hero Main card ──────────────────────────────────────────────
+    const sevLabel = {CRITICAL:'Critical',HIGH:'High',MEDIUM:'Medium',LOW:'Low',INFO:'Informational'}[sevState.main]||'';
+    const sevClass = {CRITICAL:'sev-critical',HIGH:'sev-high',MEDIUM:'sev-medium',LOW:'sev-low',INFO:'sev-info'}[sevState.main]||'sev-info';
+
+    const newHeroMain = `    <!-- ★ HERO MAIN ★ -->
+    <a class="hero-card-main" href="${esc(val('main-url'))}">
+      <img
+        class="hero-banner"
+        src="${esc(val('main-banner'))}"
+        alt="${esc(val('main-title'))}"
+        onerror="this.style.minHeight='200px'"
+      >
+      <div class="published-date"> 
+        <span class="cs-date align-right">${esc(val('main-date'))}</span>
+      </div>
+
+      <div class="hero-body">
+        <h2>${esc(val('main-title'))}</h2>
+        <div class="hero-main-divider"></div> 
+        <div class="hero-meta">          
+          ${tagsHTML(val('main-tags'))}
+        </div>
+        
+        <p>${esc(val('main-excerpt'))}</p>
+        ${val('main-keyfinding') ? `<p style="color: #e2e8f0;"><strong>Key Finding:</strong> ${esc(val('main-keyfinding'))}</p>` : ''}
+        <span class="cs-read-more">Read more →</span>
+      </div>
+    </a>`;
+
+    // ── Build new Hero Side Top ───────────────────────────────────────────────
+    const newHeroSideTop = `    <!-- ★ HERO SIDE TOP ★ -->
+    <a class="hero-card-side" href="${esc(val('side1-url'))}">
+      <img
+        class="side-banner"
+        src="${esc(val('side1-banner'))}"
+        alt="${esc(val('side1-title'))} banner"
+        onerror="this.style.minHeight='100px'"
+      >
+      <div class="published-date"> 
+        <span class="cs-date align-right">${esc(val('side1-date'))}</span>
+      </div>      
+      
+      <div class="side-body">
+        <h3>${esc(val('side1-title'))}</h3>
+        <div class="hero-side-divider"></div> 
+        <div class="side-meta">
+          ${tagsHTML(val('side1-tags'))}
+        </div>        
+        <p>${esc(val('side1-excerpt'))}</p>
+        <span class="cs-read-more">Read more →</span>
+      </div>
+    </a>`;
+
+    // ── Build new Hero Side Bottom ────────────────────────────────────────────
+    const newHeroSideBottom = `    <!-- ★ HERO SIDE BOTTOM ★ -->
+    <a class="hero-card-side" href="${esc(val('side2-url'))}">
+      <img
+        class="side-banner"
+        src="${esc(val('side2-banner'))}"
+        alt="${esc(val('side2-title'))} banner"
+        onerror="this.style.minHeight='100px'"
+      >
+
+      <div class="published-date"> 
+        <span class="cs-date align-right">${esc(val('side2-date'))}</span>
+      </div>
+
+      <div class="side-body">
+        <h3>${esc(val('side2-title'))}</h3>
+        <div class="hero-side-divider"></div> 
+        <div class="side-meta">
+          ${tagsHTML(val('side2-tags'))}
+        </div>
+        
+        <p>${esc(val('side2-excerpt'))}</p>
+        <span class="cs-read-more">Read more →</span>
+      </div>
+    </a>`;
+
+    // ── Extract current hero cards to cascade into news ───────────────────────
+    // Extract current Hero Main
+    const heroMainMatch = intelHTML.match(/<!-- ★ HERO MAIN ★ -->([\s\S]*?)(?=<!-- ★ HERO SIDE TOP ★|$)/);
+    const heroSideTopMatch = intelHTML.match(/<!-- ★ HERO SIDE TOP ★ -->([\s\S]*?)(?=<!-- ★ HERO SIDE BOTTOM ★|$)/);
+    const heroSideBottomMatch = intelHTML.match(/<!-- ★ HERO SIDE BOTTOM ★ -->([\s\S]*?)(?=<\/div><!-- \/hero-grid -->|$)/);
+
+    if(!heroMainMatch || !heroSideTopMatch || !heroSideBottomMatch) {
+      throw new Error('Could not find Hero card markers in intel.html. Check that the file uses the expected comment structure.');
+    }
+
+    // Convert hero cards to news cards
+    function heroMainToNews(heroBlock) {
+      // Extract fields from hero-card-main block
+      const href    = heroBlock.match(/href="([^"]+)"/)?.[1] || '#';
+      const src     = heroBlock.match(/src="([^"]+)"/)?.[1] || '';
+      const alt     = heroBlock.match(/alt="([^"]+)"/)?.[1] || '';
+      const date    = heroBlock.match(/cs-date align-right">([^<]+)<\/span>/)?.[1] || '';
+      const h2      = heroBlock.match(/<h2>([^<]+)<\/h2>/)?.[1] || '';
+      const tags    = [...heroBlock.matchAll(/<span class="cs-tag">([^<]+)<\/span>/g)].map(m=>m[1]);
+      const paras   = [...heroBlock.matchAll(/<p>([^<]+)<\/p>/g)].map(m=>m[1]);
+      const excerpt = paras[0] || '';
+      const thumbSrc = src.replace('banners/','banners/').replace('.png','.png'); // same path works
+
+      return `        <!-- ROTATED FROM HERO MAIN -->
+        <a class="news-card" href="${esc(href)}">
+          <div class="news-left">
+            <img
+              class="news-thumb"
+              src="${esc(thumbSrc)}"
+              alt="${esc(alt)}"
+              onerror="this.style.background='var(--cs-navy)'"
+            >
+            <span class="news-pub-date">${esc(date)}</span>
+          </div>
+          <div class="news-body">
+            <h3>${esc(h2)}</h3>
+            <div class="news-divider"></div>
+            <div class="news-meta">
+              ${tags.map(t=>`<span class="cs-tag">${esc(t)}</span>`).join('\n              ')}
+            </div>
+            <p>${esc(excerpt)}</p>
+          </div>
+        </a>`;
+    }
+
+    function heroSideToNews(heroBlock, label) {
+      const href    = heroBlock.match(/href="([^"]+)"/)?.[1] || '#';
+      const src     = heroBlock.match(/src="([^"]+)"/)?.[1] || '';
+      const alt     = heroBlock.match(/alt="([^"]+)"/)?.[1] || '';
+      const date    = heroBlock.match(/cs-date align-right">([^<]+)<\/span>/)?.[1] || '';
+      const h3      = heroBlock.match(/<h3>([^<]+)<\/h3>/)?.[1] || '';
+      const tags    = [...heroBlock.matchAll(/<span class="cs-tag">([^<]+)<\/span>/g)].map(m=>m[1]);
+      const paras   = [...heroBlock.matchAll(/<p>([^<]+)<\/p>/g)].map(m=>m[1]);
+      const excerpt = paras[0] || '';
+
+      return `        <!-- ROTATED FROM ${label} -->
+        <a class="news-card" href="${esc(href)}">
+          <div class="news-left">
+            <img
+              class="news-thumb"
+              src="${esc(src)}"
+              alt="${esc(alt)}"
+              onerror="this.style.background='var(--cs-navy)'"
+            >
+            <span class="news-pub-date">${esc(date)}</span>
+          </div>
+          <div class="news-body">
+            <h3>${esc(h3)}</h3>
+            <div class="news-divider"></div>
+            <div class="news-meta">
+              ${tags.map(t=>`<span class="cs-tag">${esc(t)}</span>`).join('\n              ')}
+            </div>
+            <p>${esc(excerpt)}</p>
+          </div>
+        </a>`;
+    }
+
+    const rotatedMain    = heroMainToNews(heroMainMatch[1]);
+    const rotatedSideTop = heroSideToNews(heroSideTopMatch[1], 'HERO SIDE TOP');
+    const rotatedSideBot = heroSideToNews(heroSideBottomMatch[1], 'HERO SIDE BOTTOM');
+
+    // ── Build new DIG cards ───────────────────────────────────────────────────
+    const newDig1 = `        <!-- NEW DIG CARD -->
+        <a class="dig-card" href="${esc(val('dig1-url'))}">
+          <img
+            class="dig-thumb"
+            src="${esc(val('dig1-banner'))}"
+            alt="${esc(val('dig1-title'))} thumbnail"
+            onerror="this.style.background='var(--cs-navy)'"
+          >
+          <span class="dig-pub-date">${esc(val('dig1-date'))}</span>
+          <div class="dig-body">
+            <h4>${esc(val('dig1-title'))}</h4>
+            <div class="dig-divider"></div>
+            <p>${esc(val('dig1-excerpt'))}</p>
+          </div>
+        </a>`;
+
+    const newDig2 = `        <!-- NEW DIG CARD -->
+        <a class="dig-card" href="${esc(val('dig2-url'))}">
+          <img
+            class="dig-thumb"
+            src="${esc(val('dig2-banner'))}"
+            alt="${esc(val('dig2-title'))} thumbnail"
+            onerror="this.style.background='var(--cs-navy)'"
+          >
+          <span class="dig-pub-date">${esc(val('dig2-date'))}</span>
+          <div class="dig-body">
+            <h4>${esc(val('dig2-title'))}</h4>
+            <div class="dig-divider"></div>
+            <p>${esc(val('dig2-excerpt'))}</p>
+          </div>
+        </a>`;
+
+    // ── Perform string replacements ───────────────────────────────────────────
+    let updated = intelHTML;
+
+    // 1. Replace Hero Main
+    updated = updated.replace(
+      /<!-- ★ HERO MAIN ★ -->[\s\S]*?(?=<!-- ★ HERO SIDE TOP ★)/,
+      newHeroMain + '\n\n    '
+    );
+
+    // 2. Replace Hero Side Top
+    updated = updated.replace(
+      /<!-- ★ HERO SIDE TOP ★ -->[\s\S]*?(?=<!-- ★ HERO SIDE BOTTOM ★)/,
+      newHeroSideTop + '\n\n    '
+    );
+
+    // 3. Replace Hero Side Bottom
+    updated = updated.replace(
+      /<!-- ★ HERO SIDE BOTTOM ★ -->[\s\S]*?(?=\s*<\/div><!-- \/hero-grid -->)/,
+      newHeroSideBottom + '\n\n  '
+    );
+
+    // 4. Replace existing rotated cards with new rotated cards
+    updated = updated.replace(
+      /<!-- ROTATED FROM HERO MAIN -->[\s\S]*?(?=<!-- ROTATED FROM HERO SIDE TOP -->)/,
+      rotatedMain + '\n\n        '
+    );
+    updated = updated.replace(
+      /<!-- ROTATED FROM HERO SIDE TOP -->[\s\S]*?(?=<!-- ROTATED FROM HERO SIDE BOTTOM -->)/,
+      rotatedSideTop + '\n\n        '
+    );
+    updated = updated.replace(
+      /<!-- ROTATED FROM HERO SIDE BOTTOM -->[\s\S]*?(?=<!-- EXISTING NEWS CARD -->)/,
+      rotatedSideBot + '\n\n        '
+    );
+
+    // 5. Prepend new DIG cards before ADD MORE DIG CARDS marker
+    updated = updated.replace(
+      '<!-- ADD MORE DIG CARDS ABOVE THIS LINE -->',
+      newDig1 + '\n\n' + newDig2 + '\n\n        <!-- ADD MORE DIG CARDS ABOVE THIS LINE -->'
+    );
+
+    outputHTML = updated;
+
+    // Show preview (first 3000 chars)
+    document.getElementById('output-text').textContent = outputHTML.substring(0, 3000) + '\n\n… [' + outputHTML.length.toLocaleString() + ' total characters]';
+    document.getElementById('output-card').classList.add('visible');
+    document.getElementById('output-card').scrollIntoView({behavior:'smooth',block:'start'});
+    setStatus('done');
+
+  } catch(e) {
+    showError(e.message);
+    setStatus('error');
+  }
+  setRunning(false);
+}
+
+function downloadOutput() {
+  if(!outputHTML) return;
+  const blob = new Blob([outputHTML], {type:'text/html'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='intel.html'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function showError(msg) { const b=document.getElementById('error-box'); b.textContent='Error: '+msg; b.classList.add('visible'); }
+function setRunning(on) {
+  document.getElementById('btn-generate').disabled=on;
+  document.getElementById('spinner').style.display=on?'block':'none';
+  document.getElementById('btn-icon').style.display=on?'none':'inline-block';
+  document.getElementById('btn-label').textContent=on?'Updating intel.html…':'Rotate & Update intel.html';
+  if(on) setStatus('running');
+}
+function setStatus(state) { const b=document.getElementById('status-badge'); b.className='status-badge '+state; b.textContent={idle:'Idle',running:'Updating',done:'Done',error:'Error'}[state]||state; }
+function openNav(){document.getElementById('nav-drawer').classList.add('open');document.getElementById('nav-overlay').classList.add('open');document.body.style.overflow='hidden';}
+function closeNav(){document.getElementById('nav-drawer').classList.remove('open');document.getElementById('nav-overlay').classList.remove('open');document.body.style.overflow='';}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeNav();});
+</script>
+</body>
+</html>
