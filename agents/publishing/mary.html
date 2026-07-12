@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/BorgesLebron/hectorborges-portfolio/main/assets/csicon.png">
+<link rel="apple-touch-icon" href="https://raw.githubusercontent.com/BorgesLebron/hectorborges-portfolio/main/assets/csicon.png">
 <title>Mary — UI Developer | CyberSense Ops</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 <style>
@@ -330,6 +332,8 @@ Required JSON structure:
 
 Rules:
 - Extract text verbatim where possible — do not paraphrase or summarize
+- CRITICAL: All string values must be valid JSON. Escape any double quotes inside string values with a backslash: \" — this includes terms like "X3D MINER", "pig butchering", "oxfemale", and any quoted words inside article text
+- CRITICAL: Do not use actual newlines inside JSON string values — use a space instead
 - tags: 5–8 short keyword tags derived from the article subject matter
 - pullQuote: extract the italicized closing key phrase or final memorable line from the Closing Statement
 - If Why It Matters has different audience labels than shown, use the actual labels from the article
@@ -398,6 +402,64 @@ function updateFilename() {
 }
 
 // ── Main run ──────────────────────────────────────────────────────────────────
+
+// ── JSON repair utility ───────────────────────────────────────────────────────
+// Fixes unescaped double quotes inside JSON string values, which Claude
+// sometimes produces when article content contains quoted terms like "X3D MINER"
+function repairJSON(str) {
+  // Walk through the string character by character, tracking whether we're
+  // inside a JSON string value. When inside a string, escape any bare " that
+  // isn't already preceded by a backslash.
+  let result = '';
+  let inString = false;
+  let i = 0;
+  while (i < str.length) {
+    const ch = str[i];
+    if (!inString) {
+      // Outside a string — structural JSON character
+      if (ch === '"') {
+        inString = true;
+        result += ch;
+      } else {
+        result += ch;
+      }
+      i++;
+    } else {
+      // Inside a string value
+      if (ch === '\\') {
+        // Escaped character — pass both chars through unchanged
+        result += ch;
+        i++;
+        if (i < str.length) { result += str[i]; i++; }
+      } else if (ch === '"') {
+        // Closing quote OR unescaped quote inside value?
+        // Look ahead: if followed by optional whitespace then :, ,, }, or ]
+        // it's structural. Otherwise it's a bare quote we need to escape.
+        let j = i + 1;
+        while (j < str.length && (str[j] === ' ' || str[j] === '\t')) j++;
+        const next = str[j];
+        if (next === ':' || next === ',' || next === '}' || next === ']' || next === '\n' || next === '\r') {
+          // Structural closing quote
+          inString = false;
+          result += ch;
+        } else if (i === str.length - 1) {
+          // End of string
+          inString = false;
+          result += ch;
+        } else {
+          // Bare quote inside a string value — escape it
+          result += '\\"';
+        }
+        i++;
+      } else {
+        result += ch;
+        i++;
+      }
+    }
+  }
+  return result;
+}
+
 async function runMary() {
   const article = document.getElementById('article-input').value.trim();
   if(!article) { alert('Paste or upload Rob\'s final article first.'); return; }
@@ -422,7 +484,8 @@ async function runMary() {
     const raw = data.content.map(b=>b.text||'').join('').trim();
 
     // Parse JSON — strip any accidental fences
-    const clean = raw.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/\s*```$/,'').trim();
+    let clean = raw.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/\s*```$/,'').trim();
+    clean = repairJSON(clean);
     articleData = JSON.parse(clean);
 
     // Step 2: Build HTML from template
