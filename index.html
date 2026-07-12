@@ -22,9 +22,12 @@
     --abg:      rgba(79,195,247,0.08);
     --aborder:  rgba(79,195,247,0.25);
     --success:  #3fb950;
+    --accent:   #34d399;
+    --danger:   #f85149;
+    --structure:#1948a6; 
     --sbg:      rgba(63,185,80,0.08);
     --maya:     #a78bfa;
-    --warning:   #d29922;
+    --warning:  #d29922;
     --radius:   8px;
     --font:     -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   }
@@ -108,13 +111,23 @@
   }
   .stage-icon.ae {
     background: rgba(63,185,80,0.08);
-    border-color: var(--success);
-    color: var(--success);
+    border-color: var(--danger);
+    color: var(--danger);
+  }
+    .stage-icon.dse {
+    background: rgba(63,185,80,0.08);
+    border-color: var(--structure);
+    color: var(--structure);
   }
   .stage-icon.eic {
     background: rgba(63,185,80,0.08);
     border-color: var(--warning);
     color: var(--warning);
+  }
+   .stage-icon.pub {
+    background: rgba(63,185,80,0.08);
+    border-color: var(--accent);
+    color: var(--accent);
   }
 
   .stage-name   { font-size: 13px; font-weight: 600; line-height: 1.3; }
@@ -229,7 +242,7 @@
 
     <div class="pipeline-stage">
       <a class="stage-card" href="/agents/intel-brief/jason.html">
-        <div class="stage-icon"><i class="ti ti-file-text"></i></div>
+        <div class="stage-icon dse"><i class="ti ti-file-text"></i></div>
         <div class="stage-name">Jason</div>
         <div class="stage-role">Developmental Editor</div>
         <span class="stage-badge badge-live">Live</span>
@@ -261,11 +274,11 @@
     <div class="stage-connector"><i class="ti ti-arrow-right"></i></div>
 
     <div class="pipeline-stage">
-      <a class="stage-card disabled" href="/agents/publishing/mary.html">
-        <div class="stage-icon"><i class="ti ti-layout"></i></div>
+      <a class="stage-card" href="/agents/publishing/mary.html">
+        <div class="stage-icon pub"><i class="ti ti-layout"></i></div>
         <div class="stage-name">Mary</div>
         <div class="stage-role">UI Developer</div>
-        <span class="stage-badge badge-soon">Planned</span>
+        <span class="stage-badge badge-live">Live</span>
       </a>
     </div>
 
@@ -299,7 +312,7 @@
 
     <div class="pipeline-stage">
       <a class="stage-card" href="/agents/daily-brief/peter.html">
-        <div class="stage-icon"><i class="ti ti-file-text"></i></div>
+        <div class="stage-icon dse"><i class="ti ti-file-text"></i></div>
         <div class="stage-name">Peter</div>
         <div class="stage-role">Developmental Editor</div>
         <span class="stage-badge badge-live">Live</span>
@@ -320,11 +333,11 @@
     <div class="stage-connector"><i class="ti ti-arrow-right"></i></div>
 
     <div class="pipeline-stage">
-      <a class="stage-card disabled" href="/agents/publishing/kirby.html">
-        <div class="stage-icon"><i class="ti ti-layout"></i></div>
+      <a class="stage-card" href="/agents/publishing/kirby.html">
+        <div class="stage-icon pub"><i class="ti ti-layout"></i></div>
         <div class="stage-name">Kirby</div>
         <div class="stage-role">UI Developer</div>
-        <span class="stage-badge badge-soon">Planned</span>
+        <span class="stage-badge badge-live">Live</span>
       </a>
     </div>
 
