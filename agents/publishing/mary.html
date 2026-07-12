@@ -273,71 +273,68 @@
 
 <script>
 // ── Extraction system prompt ──────────────────────────────────────────────────
-const EXTRACT_PROMPT = `You are a content extraction agent for CyberSense.Solutions. Extract all content fields from the provided article and return ONLY a valid JSON object with no preamble, no markdown fences, no explanation.
+const EXTRACT_PROMPT = `You are a content extraction agent for CyberSense.Solutions. Extract all content fields from the provided article and return them using XML-style section tags exactly as shown below. Do NOT use JSON. Do NOT use markdown. Output only the tagged content.
 
-Required JSON structure:
-{
-  "execSummary": ["paragraph 1 text", "paragraph 2 text", "paragraph 3 text (immediate guidance sentence if present)"],
-  "keyFinding": "The full Key Finding statement text only (no 'Key Finding:' label)",
-  "whatHappened": ["paragraph 1", "paragraph 2", "paragraph 3", "paragraph 4"],
-  "whyMatters": [
-    {"audience": "For Security Practitioners & SOC Teams", "text": "full paragraph"},
-    {"audience": "For Security Leaders & CISOs", "text": "full paragraph"},
-    {"audience": "For Policy, Risk & Compliance Officers", "text": "full paragraph"}
-  ],
-  "opImplications": [
-    {"timeframe": "Immediate (Days to Weeks)", "text": "full paragraph"},
-    {"timeframe": "Short-Term (Weeks to Months)", "text": "full paragraph"},
-    {"timeframe": "Long-Term (Months to Years)", "text": "full paragraph"}
-  ],
-  "actions": [
-    {
-      "tier": "Baseline",
-      "label": "Baseline Maturity Environments",
-      "color": "cyan",
-      "subtitle": "Organizations with standard security tooling and general-purpose endpoint protection.",
-      "items": ["action 1", "action 2", "action 3"]
-    },
-    {
-      "tier": "Intermediate",
-      "label": "Intermediate Maturity Organizations",
-      "color": "amber",
-      "subtitle": "Organizations with dedicated security functions, SIEM coverage, and structured incident response capability.",
-      "items": ["action 1", "action 2", "action 3"]
-    },
-    {
-      "tier": "Advanced",
-      "label": "Advanced Institutional Environments",
-      "color": "red",
-      "subtitle": "Organizations with mature security programs, threat intelligence capacity, and advanced monitoring capability.",
-      "items": ["action 1", "action 2", "action 3"]
-    }
-  ],
-  "closing": ["paragraph 1", "paragraph 2"],
-  "pullQuote": "The memorable closing key phrase or pull quote (the final memorable line)",
-  "techData": {
-    "cveId": "full CVE/ID field text",
-    "cvss": "full CVSS field text",
-    "classification": "full Classification field text",
-    "announced": "full Announced field text",
-    "trackedActivity": "full Tracked Activity field text",
-    "attackVectors": "full Attack Vectors field text",
-    "targetPlatforms": "full Target Platforms field text",
-    "targetProduct": "full Target Product field text",
-    "targetEnv": "full Target Environment field text",
-    "exposureWindow": "full Exposure Window field text"
-  },
-  "tags": ["tag1", "tag2", "tag3", "tag4", "tag5"]
-}
+Use these exact tags — one per line where shown, content between open and close tags:
+
+<EXEC_P1>first executive summary paragraph</EXEC_P1>
+<EXEC_P2>second executive summary paragraph</EXEC_P2>
+<EXEC_P3>third executive summary paragraph (immediate actionable guidance sentence if present, otherwise omit)</EXEC_P3>
+<KEY_FINDING>the key finding statement text only, no label</KEY_FINDING>
+<WHAT_P1>what happened paragraph 1</WHAT_P1>
+<WHAT_P2>what happened paragraph 2</WHAT_P2>
+<WHAT_P3>what happened paragraph 3</WHAT_P3>
+<WHAT_P4>what happened paragraph 4</WHAT_P4>
+<WHY_AUD1>For Security Practitioners &amp; SOC Teams</WHY_AUD1>
+<WHY_TXT1>why it matters paragraph for audience 1</WHY_TXT1>
+<WHY_AUD2>For Security Leaders &amp; CISOs</WHY_AUD2>
+<WHY_TXT2>why it matters paragraph for audience 2</WHY_TXT2>
+<WHY_AUD3>For Policy, Risk &amp; Compliance Officers</WHY_AUD3>
+<WHY_TXT3>why it matters paragraph for audience 3</WHY_TXT3>
+<OP_TIME1>Immediate (Days to Weeks)</OP_TIME1>
+<OP_TXT1>operational implications paragraph 1</OP_TXT1>
+<OP_TIME2>Short-Term (Weeks to Months)</OP_TIME2>
+<OP_TXT2>operational implications paragraph 2</OP_TXT2>
+<OP_TIME3>Long-Term (Months to Years)</OP_TIME3>
+<OP_TXT3>operational implications paragraph 3</OP_TXT3>
+<ACT_SUB1>Organizations with standard security tooling and general-purpose endpoint protection.</ACT_SUB1>
+<ACT_ITEM1_1>baseline action item 1</ACT_ITEM1_1>
+<ACT_ITEM1_2>baseline action item 2</ACT_ITEM1_2>
+<ACT_ITEM1_3>baseline action item 3</ACT_ITEM1_3>
+<ACT_ITEM1_4>baseline action item 4 (if present)</ACT_ITEM1_4>
+<ACT_SUB2>Organizations with dedicated security functions, SIEM coverage, and structured incident response capability.</ACT_SUB2>
+<ACT_ITEM2_1>intermediate action item 1</ACT_ITEM2_1>
+<ACT_ITEM2_2>intermediate action item 2</ACT_ITEM2_2>
+<ACT_ITEM2_3>intermediate action item 3</ACT_ITEM2_3>
+<ACT_ITEM2_4>intermediate action item 4 (if present)</ACT_ITEM2_4>
+<ACT_SUB3>Organizations with mature security programs, threat intelligence capacity, and advanced monitoring capability.</ACT_SUB3>
+<ACT_ITEM3_1>advanced action item 1</ACT_ITEM3_1>
+<ACT_ITEM3_2>advanced action item 2</ACT_ITEM3_2>
+<ACT_ITEM3_3>advanced action item 3</ACT_ITEM3_3>
+<ACT_ITEM3_4>advanced action item 4 (if present)</ACT_ITEM3_4>
+<CLOSE_P1>closing statement paragraph 1</CLOSE_P1>
+<CLOSE_P2>closing statement paragraph 2</CLOSE_P2>
+<PULL_QUOTE>the memorable final closing line or pull quote</PULL_QUOTE>
+<TECH_CVE>full CVE/ID field text</TECH_CVE>
+<TECH_CVSS>full CVSS Score field text</TECH_CVSS>
+<TECH_CLASS>full Classification field text</TECH_CLASS>
+<TECH_ANN>full Announced field text</TECH_ANN>
+<TECH_TRACK>full Tracked Activity field text</TECH_TRACK>
+<TECH_VEC>full Attack Vectors field text</TECH_VEC>
+<TECH_PLAT>full Target Platforms field text</TECH_PLAT>
+<TECH_PROD>full Target Product field text</TECH_PROD>
+<TECH_ENV>full Target Environment field text</TECH_ENV>
+<TECH_EXP>full Exposure Window field text</TECH_EXP>
+<TAG>keyword tag 1</TAG>
+<TAG>keyword tag 2</TAG>
+<TAG>keyword tag 3</TAG>
+<TAG>keyword tag 4</TAG>
+<TAG>keyword tag 5</TAG>
 
 Rules:
-- Extract text verbatim where possible — do not paraphrase or summarize
-- CRITICAL: All string values must be valid JSON. Escape any double quotes inside string values with a backslash: \" — this includes terms like "X3D MINER", "pig butchering", "oxfemale", and any quoted words inside article text
-- CRITICAL: Do not use actual newlines inside JSON string values — use a space instead
-- tags: 5–8 short keyword tags derived from the article subject matter
-- pullQuote: extract the italicized closing key phrase or final memorable line from the Closing Statement
-- If Why It Matters has different audience labels than shown, use the actual labels from the article
-- Return ONLY the JSON object. No markdown, no explanation, no surrounding text.`;
+- Use the actual audience labels from the article for WHY_AUD1/2/3 if they differ from the examples shown
+- For ACT_ITEM tags: only output items that exist in the article; omit _4 tags if the tier has only 3 items
+- Output only the tagged lines above. No preamble, no explanation, no other text.\``;
 
 // ── State ─────────────────────────────────────────────────────────────────────
 let severity = 'INFORMATIONAL';
@@ -403,61 +400,64 @@ function updateFilename() {
 
 // ── Main run ──────────────────────────────────────────────────────────────────
 
-// ── JSON repair utility ───────────────────────────────────────────────────────
-// Fixes unescaped double quotes inside JSON string values, which Claude
-// sometimes produces when article content contains quoted terms like "X3D MINER"
-function repairJSON(str) {
-  // Walk through the string character by character, tracking whether we're
-  // inside a JSON string value. When inside a string, escape any bare " that
-  // isn't already preceded by a backslash.
-  let result = '';
-  let inString = false;
-  let i = 0;
-  while (i < str.length) {
-    const ch = str[i];
-    if (!inString) {
-      // Outside a string — structural JSON character
-      if (ch === '"') {
-        inString = true;
-        result += ch;
-      } else {
-        result += ch;
-      }
-      i++;
-    } else {
-      // Inside a string value
-      if (ch === '\\') {
-        // Escaped character — pass both chars through unchanged
-        result += ch;
-        i++;
-        if (i < str.length) { result += str[i]; i++; }
-      } else if (ch === '"') {
-        // Closing quote OR unescaped quote inside value?
-        // Look ahead: if followed by optional whitespace then :, ,, }, or ]
-        // it's structural. Otherwise it's a bare quote we need to escape.
-        let j = i + 1;
-        while (j < str.length && (str[j] === ' ' || str[j] === '\t')) j++;
-        const next = str[j];
-        if (next === ':' || next === ',' || next === '}' || next === ']' || next === '\n' || next === '\r') {
-          // Structural closing quote
-          inString = false;
-          result += ch;
-        } else if (i === str.length - 1) {
-          // End of string
-          inString = false;
-          result += ch;
-        } else {
-          // Bare quote inside a string value — escape it
-          result += '\\"';
-        }
-        i++;
-      } else {
-        result += ch;
-        i++;
-      }
-    }
+// ── Tagged-format parser ──────────────────────────────────────────────────────
+function parseTagged(raw) {
+  function get(tag) {
+    const m = raw.match(new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`));
+    return m ? m[1].trim() : '';
   }
-  return result;
+  function getAll(tag) {
+    const matches = [...raw.matchAll(new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`, 'g'))];
+    return matches.map(m => m[1].trim()).filter(Boolean);
+  }
+  function getItems(prefix) {
+    const items = [];
+    for (let i = 1; i <= 4; i++) {
+      const v = get(`${prefix}_${i}`);
+      if (v) items.push(v);
+    }
+    return items;
+  }
+
+  const execParas = [get('EXEC_P1'), get('EXEC_P2'), get('EXEC_P3')].filter(Boolean);
+  const whatParas = ['WHAT_P1','WHAT_P2','WHAT_P3','WHAT_P4'].map(t=>get(t)).filter(Boolean);
+  const closingParas = [get('CLOSE_P1'), get('CLOSE_P2')].filter(Boolean);
+
+  return {
+    execSummary: execParas,
+    keyFinding:  get('KEY_FINDING'),
+    whatHappened: whatParas,
+    whyMatters: [
+      { audience: get('WHY_AUD1') || 'For Security Practitioners & SOC Teams', text: get('WHY_TXT1') },
+      { audience: get('WHY_AUD2') || 'For Security Leaders & CISOs',            text: get('WHY_TXT2') },
+      { audience: get('WHY_AUD3') || 'For Policy, Risk & Compliance Officers',  text: get('WHY_TXT3') }
+    ].filter(s => s.text),
+    opImplications: [
+      { timeframe: get('OP_TIME1') || 'Immediate (Days to Weeks)',       text: get('OP_TXT1') },
+      { timeframe: get('OP_TIME2') || 'Short-Term (Weeks to Months)',    text: get('OP_TXT2') },
+      { timeframe: get('OP_TIME3') || 'Long-Term (Months to Years)',     text: get('OP_TXT3') }
+    ].filter(s => s.text),
+    actions: [
+      { tier:'Baseline',     label:'Baseline Maturity Environments',     color:'cyan',  subtitle: get('ACT_SUB1'), items: getItems('ACT_ITEM1') },
+      { tier:'Intermediate', label:'Intermediate Maturity Organizations', color:'amber', subtitle: get('ACT_SUB2'), items: getItems('ACT_ITEM2') },
+      { tier:'Advanced',     label:'Advanced Institutional Environments', color:'red',   subtitle: get('ACT_SUB3'), items: getItems('ACT_ITEM3') }
+    ].filter(a => a.items.length > 0),
+    closing:   closingParas,
+    pullQuote: get('PULL_QUOTE'),
+    techData: {
+      cveId:          get('TECH_CVE'),
+      cvss:           get('TECH_CVSS'),
+      classification: get('TECH_CLASS'),
+      announced:      get('TECH_ANN'),
+      trackedActivity:get('TECH_TRACK'),
+      attackVectors:  get('TECH_VEC'),
+      targetPlatforms:get('TECH_PLAT'),
+      targetProduct:  get('TECH_PROD'),
+      targetEnv:      get('TECH_ENV'),
+      exposureWindow: get('TECH_EXP')
+    },
+    tags: getAll('TAG')
+  };
 }
 
 async function runMary() {
@@ -483,10 +483,8 @@ async function runMary() {
     const data = await res.json();
     const raw = data.content.map(b=>b.text||'').join('').trim();
 
-    // Parse JSON — strip any accidental fences
-    let clean = raw.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/\s*```$/,'').trim();
-    clean = repairJSON(clean);
-    articleData = JSON.parse(clean);
+    // Parse XML-tagged sections — immune to quote/escape issues
+    articleData = parseTagged(raw);
 
     // Step 2: Build HTML from template
     generatedHTML = buildArticleHTML(articleData);
