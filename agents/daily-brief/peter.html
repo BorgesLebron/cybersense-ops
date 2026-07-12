@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/BorgesLebron/hectorborges-portfolio/main/assets/csicon.png">
+<link rel="apple-touch-icon" href="https://raw.githubusercontent.com/BorgesLebron/hectorborges-portfolio/main/assets/csicon.png">
+<title>Peter — Developmental Editor | CyberSense Ops</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+  :root{
+    --bg:#0d1117;
+    --surface-1:#161b22;
+    --surface-2:#1c2128;
+    --surface-3:#21262d;
+    --border:#30363d;
+    --border-strong:#484f58;
+    --text-primary:#e6edf3;
+    --text-secondary:#8b949e;
+    --text-muted:#484f58;
+    --accent:#56d364;
+    --accent-bg:rgba(86,211,100,0.08);
+    --accent-border:rgba(86,211,100,0.3);
+    --success:#3fb950;
+    --success-bg:rgba(63,185,80,0.08);
+    --danger:#f85149;
+    --danger-bg:rgba(248,81,73,0.08);
+    --warning:#d29922;
+    --warning-bg:rgba(210,153,34,0.08);
+    --brand:#1a1a2e;
+    --radius:6px;
+    --font-sans:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    --font-mono:'SF Mono','Fira Code',monospace;
+    --font-voice:Georgia,'Times New Roman',serif;
+  }
+  .nav-drawer-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.6);
+    backdrop-filter:blur(2px);
+    z-index:900;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 0.2s
+  }
+  .nav-drawer-overlay.open{opacity:1;pointer-events:all}
+  .nav-drawer{
+    position:fixed;
+    top:0;
+    left:0;
+    bottom:0;
+    width:320px;
+    background:var(--surface-1);
+    border-right:1px solid var(--border);
+    z-index:901;
+    display:flex;
+    flex-direction:column;
+    transform:translateX(-100%);
+    transition:transform 0.22s cubic-bezier(0.4,0,0.2,1);
+    overflow:scroll
+  }
+  .nav-drawer.open{transform:translateX(0)}
+  .nav-drawer-head{
+    padding:16px;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-shrink:0
+  }
+  .nav-drawer-logo{display:flex;align-items:center;gap:10px}
+  .nav-drawer-logo-mark{
+    width:30px;
+    height:30px;
+    border-radius:7px;
+    background:var(--brand);
+    border:1px solid var(--accent-border);
+    display:flex;
+    align-items:center;
+    justify-content:center
+  }
+  .nav-drawer-logo-mark span{color:var(--accent);font-size:12px;font-weight:700}
+  .nav-drawer-title{font-size:13px;font-weight:600}
+  .nav-drawer-sub{font-size:11px;color:var(--text-muted);margin-top:1px}
+  .nav-drawer-close{
+    width:28px;height:28px;
+    border-radius:var(--radius);
+    border:1px solid var(--border);
+    background:var(--surface-2);
+    color:var(--text-secondary);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:15px;
+    transition:background 0.1s
+  }
+  .nav-drawer-close:hover{background:var(--surface-3)}
+  .nav-drawer-body{flex:1;overflow-y:auto;padding:12px}
+  .nav-pipeline-label{
+    font-size:10px;
+    font-weight:600;
+    letter-spacing:0.09em;
+    text-transform:uppercase;
+    color:var(--text-muted);
+    padding:8px 4px 6px
+  }
+  .nav-pipeline-label:not(:first-child){margin-top:8px}
+  .nav-agent-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:9px 10px;
+    border-radius:var(--radius);
+    text-decoration:none;
+    color:var(--text-secondary);
+    font-size:13px;
+    transition:background 0.1s,color 0.1s;
+    cursor:pointer;
+    border:1px solid transparent
+  }
+  .nav-agent-row:hover:not(.nav-disabled){background:var(--surface-2);color:var(--text-primary)}
+  .nav-agent-row.nav-active{background:var(--accent-bg);color:var(--accent);border-color:var(--accent-border)}
+  .nav-agent-row.nav-disabled{opacity:0.4;cursor:default;pointer-events:none}
+  .nav-agent-icon{
+    width:28px;
+    height:28px;
+    border-radius:6px;
+    background:var(--surface-3);
+    border:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:13px;
+    flex-shrink:0;
+    color:var(--text-muted)
+  }
+  .nav-agent-row.nav-active 
+  .nav-agent-icon{background:var(--accent-bg);border-color:var(--accent-border);color:var(--accent)}
+  .nav-agent-info{flex:1;min-width:0}
+  .nav-agent-name{font-weight:600;font-size:13px}
+  .nav-agent-role{font-size:11px;color:var(--text-muted);margin-top:1px}
+  .nav-status-pip{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+  .pip-live{background:var(--success)}
+  .pip-planned{background:var(--border-strong)}
+  .nav-drawer-foot{padding:12px;border-top:1px solid var(--border);flex-shrink:0}
+  .nav-drawer-foot-link{
+    display:flex;
+    align-items:center;gap:7px;
+    font-size:12px;
+    color:var(--text-muted);
+    text-decoration:none;
+    padding:7px 8px;
+    border-radius:var(--radius);
+    transition:background 0.1s,color 0.1s
+  }
+  .nav-drawer-foot-link:hover{background:var(--surface-2);color:var(--text-secondary)}
+  .top-nav{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    height:42px;
+    background:var(--surface-1);
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    padding:0 16px;
+    gap:12px;
+    z-index:800
+  }
+  .top-nav-btn{
+    width:30px;height:30px;
+    border-radius:var(--radius);
+    border:1px solid var(--border);
+    background:var(--surface-2);
+    color:var(--text-secondary);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:15px;
+    transition:background 0.1s;
+    flex-shrink:0
+  }
+  .top-nav-btn:hover{background:var(--surface-3)}
+  .top-nav-crumb{font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:6px}
+  .top-nav-crumb a{color:var(--text-muted);text-decoration:none}
+  .top-nav-crumb a:hover{color:var(--accent)}
+  .top-nav-crumb .crumb-current{color:var(--text-primary);font-weight:600}
+  .top-nav-agent-badge{
+    margin-left:auto;
+    font-size:11px;
+    font-weight:600;
+    padding:3px 10px;
+    border-radius:12px;
+    background:var(--accent-bg);
+    color:var(--accent);
+    border:1px solid var(--accent-border);
+    letter-spacing:0.04em
+  }
+  
+  body{
+    padding-top:42px;
+    font-family:var(--font-sans);
+    background:var(--bg);
+    color:var(--text-primary);
+    min-height:300vh;
+    display:grid;
+    grid-template-columns:260px 1fr;
+    grid-template-rows:calc(300vh - 42px);
+    overflow:scroll
+  }
+  .sidebar{background:var(--surface-1);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:scroll}
+  .sidebar-head{padding:16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0}
+  .logo-mark{width:32px;height:32px;border-radius:8px;background:var(--brand);border:1px solid var(--accent-border);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .logo-mark span{color:var(--accent);font-size:13px;font-weight:700}.pub-name{font-size:13px;font-weight:600}.pub-sub{font-size:11px;color:var(--text-muted);margin-top:1px}
+  .agent-card{margin:12px;padding:12px;background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:var(--radius);flex-shrink:0}
+  .agent-name{font-size:13px;font-weight:700;color:var(--accent);display:flex;align-items:center;gap:6px}
+  .agent-role{font-size:11px;color:var(--text-secondary);margin-top:3px}
+  .pipeline-badge{font-size:10px;font-weight:600;letter-spacing:0.07em;background:var(--surface-3);color:var(--text-muted);border:1px solid var(--border);border-radius:4px;padding:2px 6px;margin-top:8px;display:inline-block}
+  .pipeline-label{font-size:10px;color:var(--text-muted);padding:14px 16px 6px;letter-spacing:0.08em;text-transform:uppercase;flex-shrink:0}
+  .pipeline-steps{padding:0 12px;flex-shrink:0}
+  .step{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:var(--radius);font-size:12px;color:var(--text-muted)}
+  .step.active{color:var(--accent);background:var(--accent-bg)}
+  .step.done{color:var(--success)}
+  .step-dot{width:8px;height:8px;border-radius:50%;background:var(--border-strong);flex-shrink:0}
+  .step.active .step-dot{background:var(--accent)}
+  .step.done .step-dot{background:var(--success)}
+  .session-section{margin:0 12px 12px;padding:10px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);flex-shrink:0}
+  .session-row{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--text-secondary);margin-bottom:4px}
+  .session-row:last-child{margin-bottom:0}
+  .session-val{color:var(--text-primary);font-weight:500}
+  .status-badge{font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px}
+  .status-badge.idle{background:var(--surface-3);color:var(--text-muted)}
+  .status-badge.running{background:var(--accent-bg);color:var(--accent)}
+  .status-badge.done{background:var(--success-bg);color:var(--success)}
+  .status-badge.error{background:var(--danger-bg);color:var(--danger)}
+  .sidebar-spacer{flex:1}
+  .sidebar-footer{padding:12px;border-top:1px solid var(--border);flex-shrink:0}
+  .footer-link{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted);text-decoration:none;padding:5px 6px;border-radius:var(--radius);transition:background 0.1s,color 0.1s}
+  .footer-link:hover{background:var(--surface-2);color:var(--text-secondary)}
+  .main{display:flex;flex-direction:column;overflow:scroll}
+  .topbar{padding:14px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+  .topbar-title{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px}
+  .topbar-title i{color:var(--accent);font-size:16px}
+  .topbar-meta{font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:14px}
+  .content-area{flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:16px}
+
+  .card{background:var(--surface-1);border:1px solid var(--border);border-radius:var(--radius);overflow:scroll}
+  .card-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .card-title{font-size:12px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.07em;display:flex;align-items:center;gap:6px}
+  .card-title i{font-size:14px}
+  .card-body{padding:16px}
+
+  .field{margin-bottom:14px}
+  .field:last-child{margin-bottom:0}
+  .field-label{font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;display:flex;align-items:center;gap:5px}
+  .field-hint{font-size:11px;color:var(--text-muted);margin-top:4px}
+  .field input[type=text]{
+    width:100%;
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    color:var(--text-primary);
+    font-size:13px;
+    padding:8px 10px;
+    outline:none;
+    transition:border-color 0.15s;
+    font-family:var(--font-sans)
+  }
+  .field input[type=text]:focus{border-color:var(--accent)}
+  .field input[type=text]::placeholder{color:var(--text-muted)}
+  .field input.mono{font-family:var(--font-mono);font-size:12px}
+
+  textarea{
+    width:100%;
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    color:var(--text-primary);
+    font-size:12px;
+    font-family:var(--font-mono);
+    line-height:1.6;
+    padding:10px 12px;
+    outline:none;
+    resize:vertical;
+    transition:border-color 0.15s
+  }
+  textarea:focus{border-color:var(--accent)}
+  textarea::placeholder{color:var(--text-muted);font-family:var(--font-sans);font-size:13px}
+  .upload-zone{
+    border:1px dashed var(--border-strong);
+    border-radius:var(--radius);
+    padding:14px 16px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    cursor:pointer;
+    transition:border-color 0.15s,
+    background 0.15s;
+    position:relative
+  }
+  .upload-zone:hover{border-color:var(--accent);background:var(--accent-bg)}
+  .upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
+  .upload-zone-icon{color:var(--text-muted);font-size:18px;flex-shrink:0}
+  .upload-zone-text{font-size:12px;color:var(--text-secondary)}
+  .upload-zone-text strong{color:var(--text-primary)}
+  .upload-zone-sub{font-size:11px;color:var(--text-muted);margin-top:2px}
+  .upload-loaded{background:var(--success-bg);border-color:rgba(63,185,80,0.3)}
+  .upload-loaded .upload-zone-icon{color:var(--success)}
+  .upload-loaded .upload-zone-text strong{color:var(--success)}
+  .meta-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .btn-generate{
+    width:100%;
+    padding:10px 16px;
+    background:var(--accent-bg);
+    border:1px solid var(--accent-border);
+    border-radius:var(--radius);
+    color:var(--accent);
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;gap:8px;
+    transition:background 0.1s
+  }
+  .btn-generate:hover:not(:disabled){background:rgba(86,211,100,0.14)}
+  .btn-generate:disabled{opacity:0.4;cursor:not-allowed}
+  .spinner{width:14px;height:14px;border:2px solid var(--accent-border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite;display:none}
+  
+  @keyframes spin{to{transform:rotate(360deg)}}
+  
+  .output-card{background:var(--surface-1);border:1px solid var(--border);border-radius:var(--radius);overflow:scroll;display:none}
+  .output-card.visible{display:block}
+  .output-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .output-label{font-size:12px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.07em;display:flex;align-items:center;gap:6px}
+  .output-actions{display:flex;gap:8px}
+  .btn-action{
+    font-size:11px;
+    font-weight:600;
+    padding:5px 10px;
+    border-radius:var(--radius);
+    border:1px solid var(--border);
+    background:var(--surface-2);
+    color:var(--text-secondary);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:5px;
+    transition:background 0.1s,border-color 0.1s
+  }
+  .btn-action:hover{background:var(--surface-3);border-color:var(--border-strong)}
+  .btn-action.primary{background:var(--accent-bg);border-color:var(--accent-border);color:var(--accent)}
+  .btn-action.primary:hover{background:rgba(86,211,100,0.14)}
+  .output-filename{padding:8px 16px;background:var(--surface-2);border-bottom:1px solid var(--border);font-size:11px;font-family:var(--font-mono);color:var(--text-muted);display:flex;align-items:center;gap:6px}
+  .output-body{padding:20px;max-height:500px;overflow-y:auto}
+  .output-text{font-family:var(--font-voice);font-size:13px;line-height:1.75;color:var(--text-primary);white-space:pre-wrap;word-break:break-word}
+  .error-box{background:var(--danger-bg);border:1px solid rgba(248,81,73,0.3);border-radius:var(--radius);padding:12px 14px;font-size:12px;color:var(--danger);display:none}
+  .error-box.visible{display:block}
+  .info-callout{background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:var(--radius);padding:10px 14px;font-size:12px;color:var(--text-secondary);display:flex;align-items:flex-start;gap:8px}
+  .info-callout i{color:var(--accent);font-size:14px;flex-shrink:0;margin-top:1px}
+  .token-row{
+    display:flex;
+    justify-content:flex-end;
+    font-size:11px;
+    color:var(--text-muted);
+    margin-top:6px
+  }
+  
+  ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:3px}
+
+</style>
+</head>
+<body>
+
+<div class="nav-drawer-overlay" id="nav-overlay" onclick="closeNav()"></div>
+<nav class="nav-drawer" id="nav-drawer">
+  <div class="nav-drawer-head"><div class="nav-drawer-logo"><div class="nav-drawer-logo-mark"><span>CS</span></div><div><div class="nav-drawer-title">CyberSense Ops</div><div class="nav-drawer-sub">Agent Navigation</div></div></div><button class="nav-drawer-close" onclick="closeNav()"><i class="ti ti-x"></i></button></div>
+  <div class="nav-drawer-body">
+    <div class="nav-pipeline-label">Intel Brief Pipeline</div>
+    <a class="nav-agent-row" href="/agents/intel-brief/james.html"><div class="nav-agent-icon"><i class="ti ti-pencil"></i></div><div class="nav-agent-info"><div class="nav-agent-name">James</div><div class="nav-agent-role">Acquisitions Editor</div></div><div class="nav-status-pip pip-live"></div></a>
+    <a class="nav-agent-row" href="/agents/intel-brief/jason.html"><div class="nav-agent-icon"><i class="ti ti-file-text"></i></div><div class="nav-agent-info"><div class="nav-agent-name">Jason</div><div class="nav-agent-role">Developmental Editor</div></div><div class="nav-status-pip pip-live"></div></a>
+    <a class="nav-agent-row" href="/agents/intel-brief/rob.html"><div class="nav-agent-icon"><i class="ti ti-crown"></i></div><div class="nav-agent-info"><div class="nav-agent-name">Rob</div><div class="nav-agent-role">Editor in Chief</div></div><div class="nav-status-pip pip-live"></div></a>
+    <a class="nav-agent-row" href="/agents/design/maya.html"><div class="nav-agent-icon"><i class="ti ti-photo"></i></div><div class="nav-agent-info"><div class="nav-agent-name">Maya</div><div class="nav-agent-role">Graphic Designer</div></div><div class="nav-status-pip pip-live"></div></a>
+    <span class="nav-agent-row nav-disabled"><div class="nav-agent-icon"><i class="ti ti-layout"></i></div><div class="nav-agent-info"><div class="nav-agent-name">Mary</div><div class="nav-agent-role">UI Developer</div></div><div class="nav-status-pip pip-planned"></div></span>
+    <span class="nav-agent-row nav-disabled"><div class="nav-agent-icon"><i class="ti ti-upload"></i></div><div class="nav-agent-info"><div class="nav-agent-name">Ethan</div><div class="nav-agent-role">Publisher</div></div><div class="nav-status-pip pip-planned"></div></span>
+    <div class="nav-pipeline-label">Daily Brief Pipeline</div>
+    <a class="nav-agent-row" href="/agents/daily-brief/ruth.html"><div class="nav-agent-icon"><i class="ti ti-pencil"></i></div><div class="nav-agent-info"><div class="nav-agent-name">Ruth</div><div class="nav-agent-role">Acquisitions Editor</div></div><div class="nav-status-pip pip-live"></div></a>
+    <a class="nav-agent-row nav-active" href="/agents/daily-brief/peter.html"><div class="nav-agent-icon"><i class="ti ti-file-text"></i></div><div class="nav-agent-info"><div class="nav-agent-name">Peter</div><div class="nav-agent-role">Developmental Editor</div></div><div class="nav-status-pip pip-live"></div></a>
+    <span class="nav-agent-row nav-disabled"><div class="nav-agent-icon"><i class="ti ti-crown"></i></div><div class="nav-agent-info"><div class="nav-agent-name">Ed</div><div class="nav-agent-role">Editor in Chief</div></div><div class="nav-status-pip pip-planned"></div></span>
+    <span class="nav-agent-row nav-disabled"><div class="nav-agent-icon"><i class="ti ti-layout"></i></div><div class="nav-agent-info"><div class="nav-agent-name">Kirby</div><div class="nav-agent-role">UI Developer</div></div><div class="nav-status-pip pip-planned"></div></span>
+    <span class="nav-agent-row nav-disabled"><div class="nav-agent-icon"><i class="ti ti-upload"></i></div><div class="nav-agent-info"><div class="nav-agent-name">Lucy</div><div class="nav-agent-role">Publisher</div></div><div class="nav-status-pip pip-planned"></div></span>
+  </div>
+  <div class="nav-drawer-foot"><a class="nav-drawer-foot-link" href="/"><i class="ti ti-layout-dashboard" style="font-size:14px"></i> Ops Dashboard</a><a class="nav-drawer-foot-link" href="https://cybersense.solutions" target="_blank"><i class="ti ti-external-link" style="font-size:14px"></i> cybersense.solutions</a></div>
+</nav>
+
+<div class="top-nav">
+  <button class="top-nav-btn" onclick="openNav()"><i class="ti ti-menu-2"></i></button>
+  <div class="top-nav-crumb"><a href="/">Ops</a><i class="ti ti-chevron-right" style="font-size:10px;color:var(--text-muted)"></i><span class="crumb-current">Peter — Developmental Editor</span></div>
+  <div class="top-nav-agent-badge">Daily Brief · Stage 2</div>
+</div>
+
+<aside class="sidebar">
+  <div class="sidebar-head"><div class="logo-mark"><span>CS</span></div><div><div class="pub-name">CyberSense Ops</div><div class="pub-sub">Daily Brief Pipeline</div></div></div>
+  <div class="agent-card"><div class="agent-name"><i class="ti ti-file-text"></i> Peter</div><div class="agent-role">Developmental &amp; Structural Editor</div><div class="pipeline-badge">DAILY BRIEF · STAGE 2 OF 5</div></div>
+  <div class="pipeline-label">Pipeline Stages</div>
+  <div class="pipeline-steps">
+    <div class="step done"><div class="step-dot"></div><span>Ruth — Acquisitions Editor</span></div>
+    <div class="step active"><div class="step-dot"></div><span>Peter — Developmental Editor</span></div>
+    <div class="step"><div class="step-dot"></div><span>Ed — Editor in Chief</span></div>
+    <div class="step"><div class="step-dot"></div><span>Kirby — UI Developer</span></div>
+    <div class="step"><div class="step-dot"></div><span>Lucy — Publisher</span></div>
+  </div>
+  <div class="pipeline-label" style="margin-top:12px;">Session</div>
+  <div class="session-section">
+    <div class="session-row"><span>Status</span><span class="status-badge idle" id="status-badge">Idle</span></div>
+    <div class="session-row"><span>Edition</span><span class="session-val" id="session-edition">—</span></div>
+    <div class="session-row"><span>Date</span><span class="session-val" id="session-date">—</span></div>
+  </div>
+  <div class="sidebar-spacer"></div>
+  <div class="sidebar-footer">
+    <a class="footer-link" href="/agents/daily-brief/ruth.html"><i class="ti ti-arrow-left" style="font-size:13px"></i> Back to Ruth</a>
+    <a class="footer-link" href="/" style="margin-top:2px;"><i class="ti ti-layout-dashboard" style="font-size:13px"></i> Ops Dashboard</a>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title"><i class="ti ti-file-text"></i> Developmental Editor — Full Draft Production</div>
+    <div class="topbar-meta"><span>Input: Ruth .txt</span><span>Output: Peter .txt</span><span>Stage 2 of 5</span></div>
+  </div>
+  <div class="content-area">
+
+    <div class="info-callout"><i class="ti ti-edit"></i><span>Paste or upload Ruth's edition outline. Peter produces the complete newsletter draft including Opening Notes, all section content, and the Final Thought — using Ruth's four binding anchors as the editorial foundation.</span></div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title"><i class="ti ti-file-import"></i> Edition Outline Input</div></div>
+      <div class="card-body">
+        <div class="field">
+          <div class="field-label"><i class="ti ti-upload" style="font-size:13px"></i> Upload Outline</div>
+          <div class="upload-zone" id="upload-zone">
+            <input type="file" accept=".txt,.md" id="file-input" onchange="handleFileUpload(this)">
+            <div class="upload-zone-icon"><i class="ti ti-file-upload"></i></div>
+            <div><div class="upload-zone-text"><strong>Upload Ruth's .txt output</strong></div><div class="upload-zone-sub">or paste the outline directly below</div></div>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label"><i class="ti ti-clipboard" style="font-size:13px"></i> Edition Outline</div>
+          <textarea id="brief-input" rows="12" placeholder="Paste Ruth's edition outline here…&#10;&#10;(SECTION 1 — UNIFICATION OUTPUTS&#10;1A — PROPOSED EDITION TITLE&#10;…)"></textarea>
+          <div class="token-row" id="char-count">0 characters</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title"><i class="ti ti-tag"></i> Edition Metadata</div></div>
+      <div class="card-body">
+        <div class="meta-row">
+          <div class="field"><div class="field-label">Edition Number</div><input type="text" id="edition-num" placeholder="166" oninput="updateSession()"></div>
+          <div class="field"><div class="field-label">Publication Date</div><input type="text" id="edition-date" placeholder="July 11, 2026" oninput="updateSession()"></div>
+        </div>
+        <div class="field">
+          <div class="field-label">Output Slug</div>
+          <input type="text" id="output-slug" class="mono" placeholder="edition-166" oninput="updateFilename()">
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <div class="field-label">Output Filename Preview</div>
+          <div style="font-family:var(--font-mono);font-size:12px;color:var(--accent);background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;" id="filename-preview">YYYYMMDD_peter_slug_v1.txt</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-generate" id="btn-generate" onclick="runPeter()">
+      <div class="spinner" id="spinner"></div>
+      <i class="ti ti-pencil" id="btn-icon" style="font-size:15px"></i>
+      <span id="btn-label">Develop Newsletter Draft</span>
+    </button>
+
+    <div class="error-box" id="error-box"></div>
+
+    <div class="output-card" id="output-card">
+      <div class="output-header">
+        <div class="output-label"><i class="ti ti-file-check"></i> Newsletter Draft — Ready for Ed</div>
+        <div class="output-actions">
+          <button class="btn-action" id="btn-copy" onclick="copyOutput()"><i class="ti ti-copy" style="font-size:13px"></i> Copy</button>
+          <button class="btn-action primary" onclick="downloadOutput()"><i class="ti ti-download" style="font-size:13px"></i> Download .txt</button>
+        </div>
+      </div>
+      <div class="output-filename"><i class="ti ti-file-text"></i><span id="filename-display">peter_output.txt</span></div>
+      <div class="output-body"><div class="output-text" id="output-text"></div></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const SYSTEM_PROMPT = `CyberSense: Daily Digital Awareness Brief
+Developmental & Structural Editor
+Agent Script — Draft Production Protocol
+
+
+Role
+You are the Developmental & Structural Editor for CyberSense: Daily Digital Awareness Brief, a daily professional intelligence newsletter designed for a cross-functional audience ranging from early-career professionals to executives, recruiters, and institutional leaders. Your role is to transform the Acquisitions Editor's completed outline into a coherent, publication-quality draft that aligns with CyberSense's mission to bridge the cybersecurity awareness gap and cultivate a resilient, digitally disciplined workforce.
+You operate between sourcing and final editorial authority. You prioritize narrative cohesion, stylistic discipline, structural balance, and audience engagement without sensationalism. You shape tone, rhythm, transitions, and section integrity while preserving analytical neutrality, proportional risk representation, and institutional credibility. You do not introduce ideological framing, political signaling, or alarmist narrative constructs. You write for informed professionals, not hobbyists or technical specialists exclusively.
+
+Primary Task
+Produce a clean, structured full draft of the Daily Digital Awareness Brief using the Acquisitions Editor's completed outline as your sole source. The AE outline contains four binding unification anchors — Edition Title, Daily Theme, Training Byte, and Edition-Level Closing Statement — that govern every editorial decision in this draft. You do not derive theme, tone, or closing direction independently. You execute against what the AE has established.
+
+Your unification role spans three structural points in the draft:
+Opening Notes — two cohesive paragraphs that translate the AE's Daily Theme into accessible, engaging editorial prose for the cross-functional audience, establishing the thematic frame for the full edition
+Section transitions — interpretive connectors between sections that maintain narrative arc and reinforce thematic coherence without introducing new source material
+Final Thought — a closing passage written in the DSE's editorial voice, using the AE's Edition-Level Closing Statement as a floor: the thematic thread and tone directive are binding, the proposed closing line is the minimum standard you meet or exceed
+
+Additionally produce full drafted content for:
+Each Situational Awareness entry — professional, neutral summary with clear workforce or institutional relevance
+Training Byte — complete four-part structure as defined by the AE (What You Need to Know, Defensive Actions, Why This Matters, Closing Quote)
+Career Development entry — concise relevance framing with ROI justification
+Modernization and AI Insight entries — strategic or operational impact framing
+
+Do not perform final ratification, reputational risk arbitration, or strategic reframing that belongs to the Editor-in-Chief. Flag unresolved ambiguities through careful phrasing rather than meta-commentary. Do not include editorial notes, justifications, or references to internal workflow in the draft output.
+
+
+
+SECTION 1 — UNIFICATION OUTPUTS
+SECTION 1 — UNIFICATION OUTPUTS
+1A — PROPOSED EDITION TITLE
+EDITION TITLE: The Illusion of Signal: Surviving the Subversion of Trusted Diagnostics, Dashboards, and Decision Loops
+TITLE RATIONALE: This title binds the daily contents together by focusing on a critical cross-functional challenge: how contemporary threats compromise the underlying integrity of our telemetry, visibility panels, and automated response architectures, tricking security operators into seeing a false state of health.
+1B — DAILY THEME
+DAILY THEME: The deliberate subversion and exploitation of diagnostic telemetry, visibility signals, and automated decision logic.
+THEME JUSTIFICATION: The selected inputs collectively document an environment where observational perimeters are blinded by design. This is demonstrated by Microsoft-signed kernel drivers freezing local EDR telemetry while corporate dashboards read full green in Situational Awareness, a high-CPU cryptomining alert serving as a distraction for silent cookie extraction in Situational Awareness, financial fraud flows moving faster than bank interdiction loops in Situational Awareness, the storage and sovereignty risk patterns of corporate telemetry logs in Career Development, the contractual formalization of auditable AI telemetry trails in Modernization Insights, and the vulnerability of autonomous SOC reasoning layers to malicious prompt manipulation in Modernization Insights.
+1C — TRAINING BYTE
+TOPIC: Hardening Enterprise Visibility Against Signal Suppression and Alert Asymmetry
+WHAT YOU NEED TO KNOW: Enterprise security programs frequently treat active visibility signals—such as a green endpoint status indicator, a routine low-priority software utility alert, or an authenticated automated response confirmation—as definitive proof of ecosystem health. Modern threat networks actively exploit this trust bias by using signed kernel drivers to silence telemetry collections at the root, delivering dual-payload campaigns where high-visibility performance impacts mask silent data theft, and targeting the unexamined reasoning layers of autonomous platforms. Relying exclusively on observational endpoints without independent validation vectors leaves an organization blind during critical intrusion windows.
+DEFENSIVE ACTIONS:
+Individual: Never install unverified diagnostic tools, cracked software, or standalone scripts into user-writable directories or multimedia folders on corporate-connected hosts.
+Team Lead: Review incident prioritization metrics to establish a strict rule that highly visible, low-severity notifications (like consumer cryptominers) generate automated cross-checking for silent data extraction events on the same asset.
+Security Team: Deploy proactive kernel-driver allowlisting via Windows Defender Application Control (WDAC), mandate out-of-band network flow verification, and introduce human-in-the-loop checkpoints for all high-consequence automated system isolations.
+WHY THIS MATTERS: Treating a quiet dashboard or a pre-configured automated response cycle as absolute security assurance introduces catastrophic tail-risk exposure, allowing automated code execution playbooks to establish persistent footholds and manipulate core transaction environments undetected.
+CLOSING QUOTE: "A dashboard or an automated execution layer that can be silently manipulated or turned into a distraction from inside the environment is not a security control—it is an unexamined vulnerability." — Symantec Threat Hunter Team Compliance Briefing (2026)
+TRAINING BYTE RATIONALE: This micro-lesson supports the newsletter mission by delivering structured, architecture-aware behavioral steps to replace passive checkpoint trust with multi-layered, out-of-band behavioral validation.
+1D — EDITION-LEVEL CLOSING STATEMENT
+THEMATIC THREAD TO REINFORCE: True operational resilience requires moving enterprise visibility strategy beyond single-point endpoint signals, establishing independent out-of-band telemetry verification, and proactively auditing the decision-making interior of all automated software actors.
+TONE DIRECTIVE: Grounded urgency and analytical discipline.
+PROPOSED CLOSING LINE / KEY PHRASE: When the validation signal itself can be falsified, behavior is the only line of defense that survives.
+CLOSING RATIONALE: This brief closes the newsletter on a highly objective, strategic note that reinforces the unified daily theme while preserving the publication's authoritative and neutral tone.
+SECTION 2 — SITUATIONAL AWARENESS
+Article #1
+HEADLINE: Green Light, Red Network: How GodDamn Ransomware's PoisonX Driver Turns Enterprise Security Dashboards Into Liabilities
+ONE-SENTENCE SUMMARY: The Hyadina threat group is deploying the GodDamn ransomware variant using a Microsoft-signed kernel driver called PoisonX to systematically terminate local security processes and strip user-mode hooks at Ring 0, leaving administrative dashboards falsely reporting full-green endpoint health.
+RATIONALE: This critical update supports the daily theme and core newsletter mission by alerting security leadership to sophisticated bypasses that exploit the trust architecture of Windows code signing to blind endpoint telemetry.
+Article #2
+HEADLINE: The Loud and the Silent: How Factory-v3 Loaders Deploy Vidar and XMRig as a Dual-Monetization Payload
+ONE-SENTENCE SUMMARY: Coordinated campaign telemetry from Palo Alto Networks Unit 42 reveals that the Factory-v3 Go-compiled loader delivers Vidar Stealer and the XMRig cryptominer concurrently, deliberately using a noisy, high-CPU mining condition to distract security teams from silent browser session cookie theft and multi-factor authentication bypasses.
+RATIONALE: This entry aligns with the unified theme by demonstrating why security operations centers must restructure alert prioritization logic to ensure visible lower-tier threats do not mask ongoing data exfiltration events.
+Article #3
+HEADLINE: Before the Money Moves: Operation First Light 2026 and the Closing Window for Financial Fraud Interdiction
+ONE-SENTENCE SUMMARY: INTERPOL's Operation First Light 2026 coordinated across 97 countries to intercept $293 million in illicit assets and arrest 5,811 suspects, highlighting that internal detection speed and pre-established bank-level freeze pathways remain the primary organizational variables in financial fraud recovery.
+RATIONALE: This international intelligence report addresses human-centric risk by showing that when AI-assisted social engineering loops scale financial fraud at machine speed, out-of-band process controls must replace a reliance on retrospective legal interdiction.
+SECTION 3 — CAREER DEVELOPMENT
+URL: https://www.govinfosecurity.com/webinars/webinar-where-your-security-data-goes-may-be-risk-w-7093
+HEADLINE / TITLE: Webinar | Where Your Security Data Goes May Be the Risk
+ONE-SENTENCE SUMMARY: This virtual briefing deconstructs the data sovereignty, third-party residency, and compliance exposures generated when modern enterprise security telemetry, system logs, and network maps are processed and stored by external security vendors.
+RESOURCE TYPE: Educational Webinar / Technical Briefing
+TARGET AUDIENCE: CISOs, security directors, SOC managers, security architects, and data privacy/compliance officers tracking downstream cloud risks.
+ROI JUSTIFICATION: Participating in this session yields high operational ROI and professional signaling by giving security teams the precise design blueprints needed to optimize ingestion pipelines, reduce redundant cloud egress fees, and insulate internal vulnerabilities from secondary vendor supply chain breaches.
+RATIONALE: This resource connects directly to the newsletter mission by helping professionals audit the structural integrity and geographic compliance of their own investigative data architectures.
+SECTION 4 — MODERNIZATION AND AI INSIGHTS
+Article #4
+HEADLINE: Accountability at the Edge of Autonomous: The CREST AI Charter and the Formalization of Professional Standards for AI-Driven Cybersecurity
+ONE-SENTENCE SUMMARY: CREST International has launched the CREST AI Charter to establish an enforceable code of ethics and conduct for penetration testing and technical assessments, requiring cybersecurity service providers to deliver transparent logs, human override checkpoints, and strict model data protections.
+RATIONALE: This regulatory update guides enterprise risk officers by translating high-level AI safety principles into clear contractual and procurement baselines to govern automated software vendors.
+Article #5
+HEADLINE: The Autonomous SOC and Its Attack Surface: Architectural Opportunity and Structural Risk in Multi-Agent Security Operations
+ONE-SENTENCE SUMMARY: Emerging peer-reviewed frameworks and field tests demonstrate that Event-Driven Agentic SOC models can compress detection-to-containment cycles to sub-second intervals, while simultaneously introducing a novel attack surface where log-embedded indirect prompt injections can compromise the AI reasoning layer.
+RATIONALE: This structural insight supports institutional resilience by highlighting that granting automated agents write-access to network controls requires strict semantic filtering and mandatory, human-in-the-loop validation checkpoints.
+SECTION 5 — ESCALATION AND ANNOTATION
+CRITICAL TELEMETRY SUPPRESSION WARNING: The GodDamn ransomware/PoisonX campaign is actively targeting North American healthcare, manufacturing, and education sectors using Microsoft-signed drivers to mask process data. Downstream writers must emphasize the immediate requirement to deploy Windows Defender Application Control (WDAC) driver allowlisting and implement out-of-band network traffic collection to bypass corrupted endpoint agents.
+AUTOMATED SECONDS VS. HUMAN HOURS ALERT: The Factory-v3 loader framework shifts stolen browser cookies and credentials into underground log markets within hours of execution, rendering traditional multi-factor authentication checkpoints useless via post-authentication session replay. In final drafting, editors should focus on the deployment of real-memory AMSI integrity monitoring and strict session-lifetime lifetime constraints.
+AI ETHICS AND ARCHITECTURE COMPLIANCE NOTE: Summaries mapping the CREST AI Charter and Autonomous ASOC architectures touch directly on emerging international regulatory policies like the EU AI Act and the UK DSIT Code of Practice. Downstream execution must adhere to the Editorial Neutrality and Sensationalism Filter_10.docx by presenting these updates with strict analytical balance, avoiding single-vendor or framework advocacy, and analyzing the material purely through professional accountability matrices.
+`;
+let outputText = '';
+
+function handleFileUpload(input) {
+  const file = input.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('brief-input').value = e.target.result;
+    updateCharCount();
+    const zone = document.getElementById('upload-zone');
+    zone.classList.add('upload-loaded');
+    zone.querySelector('.upload-zone-text strong').textContent = file.name;
+    zone.querySelector('.upload-zone-sub').textContent = 'Loaded — ready to develop';
+  };
+  reader.readAsText(file);
+}
+
+document.getElementById('brief-input').addEventListener('input', updateCharCount);
+function updateCharCount() { document.getElementById('char-count').textContent = document.getElementById('brief-input').value.length.toLocaleString() + ' characters'; }
+
+function updateSession() {
+  const ed = document.getElementById('edition-num').value.trim();
+  const dt = document.getElementById('edition-date').value.trim();
+  document.getElementById('session-edition').textContent = ed ? 'Edition ' + ed : '—';
+  document.getElementById('session-date').textContent = dt || '—';
+  updateFilename();
+}
+
+function updateFilename() {
+  const date = document.getElementById('edition-date').value.trim();
+  const slug = document.getElementById('output-slug').value.trim().toLowerCase().replace(/[^a-z0-9-]/g,'-').replace(/-+/g,'-') || 'slug';
+  let dateStr = 'YYYYMMDD';
+  if(date) { const d=new Date(date); if(!isNaN(d)) { dateStr=d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0'); } }
+  const fname = `${dateStr}_peter_${slug}_v1.txt`;
+  document.getElementById('filename-preview').textContent = fname;
+  document.getElementById('filename-display').textContent = fname;
+}
+
+async function runPeter() {
+  const outline = document.getElementById('brief-input').value.trim();
+  if(!outline) { alert('Paste or upload Ruth\'s edition outline first.'); return; }
+  setRunning(true); clearOutput();
+  try {
+    const res = await fetch('/api/brief', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:8192, system:SYSTEM_PROMPT, messages:[{role:'user', content: outline}] })
+    });
+    if(!res.ok) { const e=await res.json().catch(()=>({})); throw new Error(e?.error?.message||`API error ${res.status}`); }
+    const data = await res.json();
+    outputText = data.content.map(b=>b.text||'').join('');
+    showOutput(outputText); setStatus('done');
+  } catch(e) { showError(e.message); setStatus('error'); }
+  setRunning(false);
+}
+
+function setRunning(on) {
+  document.getElementById('btn-generate').disabled=on;
+  document.getElementById('spinner').style.display=on?'block':'none';
+  document.getElementById('btn-icon').style.display=on?'none':'inline-block';
+  document.getElementById('btn-label').textContent=on?'Developing draft…':'Develop Newsletter Draft';
+  if(on) setStatus('running');
+}
+function setStatus(state) { const b=document.getElementById('status-badge'); b.className='status-badge '+state; b.textContent={idle:'Idle',running:'Running',done:'Done',error:'Error'}[state]||state; }
+function showOutput(text) { document.getElementById('output-text').textContent=text; document.getElementById('output-card').classList.add('visible'); document.getElementById('output-card').scrollIntoView({behavior:'smooth',block:'start'}); }
+function clearOutput() { document.getElementById('output-card').classList.remove('visible'); document.getElementById('output-text').textContent=''; document.getElementById('error-box').classList.remove('visible'); document.getElementById('error-box').textContent=''; outputText=''; }
+function showError(msg) { const b=document.getElementById('error-box'); b.textContent='Error: '+msg; b.classList.add('visible'); }
+function copyOutput() {
+  if(!outputText) return;
+  navigator.clipboard.writeText(outputText).then(()=>{
+    const btn=document.getElementById('btn-copy'); btn.innerHTML='<i class="ti ti-check" style="font-size:13px"></i> Copied';
+    setTimeout(()=>{btn.innerHTML='<i class="ti ti-copy" style="font-size:13px"></i> Copy';},2000);
+  });
+}
+function downloadOutput() {
+  if(!outputText) return;
+  const fname=document.getElementById('filename-display').textContent||'peter_output.txt';
+  const blob=new Blob([outputText],{type:'text/plain'}); const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=fname; a.click(); URL.revokeObjectURL(url);
+}
+function openNav(){document.getElementById('nav-drawer').classList.add('open');document.getElementById('nav-overlay').classList.add('open');document.body.style.overflow='hidden';}
+function closeNav(){document.getElementById('nav-drawer').classList.remove('open');document.getElementById('nav-overlay').classList.remove('open');document.body.style.overflow='';}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeNav();});
+updateSession(); updateFilename();
+</script>
+</body>
+</html>

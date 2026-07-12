@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/BorgesLebron/hectorborges-portfolio/main/assets/csicon.png">
+<link rel="apple-touch-icon" href="https://raw.githubusercontent.com/BorgesLebron/hectorborges-portfolio/main/assets/csicon.png">
+<title>Ruth — Acquisitions Editor | CyberSense Ops</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0d1117;
+    --surface-1:#161b22;
+    --surface-2:#1c2128;
+    --surface-3:#21262d;
+    --border:#30363d;
+    --border-strong:#484f58;
+    --text-primary:#e6edf3;
+    --text-secondary:#8b949e;
+    --text-muted:#484f58;
+    --accent:#4fc3f7;
+    --accent-bg:rgba(79,195,247,0.08);
+    --accent-border:rgba(79,195,247,0.3);
+    --success:#3fb950;
+    --success-bg:rgba(63,185,80,0.08);
+    --danger:#f85149;
+    --danger-bg:rgba(248,81,73,0.08);
+    --warning:#d29922;
+    --warning-bg:rgba(210,153,34,0.08);
+    --brand:#1a1a2e;
+    --radius:6px;
+    --font-sans:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    --font-mono:'SF Mono','Fira Code',monospace;
+    --font-voice:Georgia,'Times New Roman',serif;
+  }
+  .nav-drawer-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.6);
+    backdrop-filter:blur(2px);
+    z-index:900;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 0.2s
+  }
+  .nav-drawer-overlay.open{
+    opacity:1;
+    pointer-events:all
+  }
+  .nav-drawer{
+    position:fixed;
+    top:0;
+    left:0;
+    bottom:0;
+    width:320px;
+    background:var(--surface-1);
+    border-right:1px solid var(--border);
+    z-index:901;
+    display:flex;
+    flex-direction:column;
+    transform:translateX(-100%);
+    transition:transform 0.22s cubic-bezier(0.4,0,0.2,1);
+    overflow:scroll
+  }
+  .nav-drawer.open{transform:translateX(0)}
+  .nav-drawer-head{
+    padding:16px;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-shrink:0
+  }
+  .nav-drawer-logo{
+    display:flex;
+    align-items:center;
+    gap:10px
+  }
+  .nav-drawer-logo-mark{
+    width:30px;
+    height:30px;
+    border-radius:7px;
+    background:var(--brand);
+    border:1px solid var(--accent-border);
+    display:flex;
+    align-items:center;
+    justify-content:center
+  }
+  .nav-drawer-logo-mark span{
+    color:var(--accent);
+    font-size:12px;
+    font-weight:700
+  }
+  .nav-drawer-title{
+    font-size:13px;
+    font-weight:600
+  }
+  .nav-drawer-sub{
+    font-size:11px;
+    color:var(--text-muted);
+    margin-top:1px
+  }
+  .nav-drawer-close{
+    width:28px;
+    height:28px;
+    border-radius:var(--radius);
+    border:1px solid var(--border);
+    background:var(--surface-2);
+    color:var(--text-secondary);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:15px;
+    transition:background 0.1s
+  }
+  .nav-drawer-close:hover{background:var(--surface-3)}
+  .nav-drawer-body{
+    flex:1;
+    overflow-y:auto;
+    padding:12px
+  }
+  .nav-pipeline-label{
+    font-size:10px;
+    font-weight:600;
+    letter-spacing:0.09em;
+    text-transform:uppercase;
+    color:var(--text-muted);
+    padding:8px 4px 6px
+  }
+  .nav-pipeline-label:not(:first-child){margin-top:8px}
+  .nav-agent-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:9px 10px;
+    border-radius:var(--radius);
+    text-decoration:none;
+    color:var(--text-secondary);
+    font-size:13px;
+    transition:background 0.1s,color 0.1s;
+    cursor:pointer;
+    border:1px solid transparent
+  }
+  .nav-agent-row:hover:not(.nav-disabled){background:var(--surface-2);color:var(--text-primary)}
+  .nav-agent-row.nav-active{background:var(--accent-bg);color:var(--accent);border-color:var(--accent-border)}
+  .nav-agent-row.nav-disabled{opacity:0.4;cursor:default;pointer-events:none}
+  .nav-agent-icon{
+    width:28px;
+    height:28px;
+    border-radius:6px;
+    background:var(--surface-3);
+    border:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:13px;
+    flex-shrink:0;
+    color:var(--text-muted)
+  }
+  .nav-agent-row.nav-active .nav-agent-icon{background:var(--accent-bg);border-color:var(--accent-border);color:var(--accent)}
+  .nav-agent-info{flex:1;min-width:0}
+  .nav-agent-name{font-weight:600;font-size:13px}
+  .nav-agent-role{font-size:11px;color:var(--text-muted);margin-top:1px}
+  .nav-agent-row.nav-active 
+  .nav-agent-role{color:rgba(79,195,247,0.6)}
+  .nav-status-pip{width:7px;height:7px;border-radius:50%;flex-shrink:0}.pip-live{background:var(--success)}.pip-planned{background:var(--border-strong)}
+  .nav-drawer-foot{padding:12px;border-top:1px solid var(--border);flex-shrink:0}
+  .nav-drawer-foot-link{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text-muted);text-decoration:none;padding:7px 8px;border-radius:var(--radius);transition:background 0.1s,color 0.1s}
+  .nav-drawer-foot-link:hover{background:var(--surface-2);color:var(--text-secondary)}
+  
+  .top-nav{
+    position:fixed;top:0;
+    left:0;
+    right:0;
+    height:42px;
+    background:var(--surface-1);
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    padding:0 16px;
+    gap:12px;
+    z-index:800
+  }
+  .top-nav-btn{
+    width:30px;
+    height:30px;
+    border-radius:var(--radius);
+    border:1px solid var(--border);
+    background:var(--surface-2);
+    color:var(--text-secondary);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:15px;
+    transition:background 0.1s,border-color 0.1s;flex-shrink:0
+  }
+  .top-nav-btn:hover{background:var(--surface-3);border-color:var(--border-strong)}
+  .top-nav-crumb{font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:6px}
+  .top-nav-crumb a{color:var(--text-muted);text-decoration:none}
+  .top-nav-crumb a:hover{color:var(--accent)}
+  .top-nav-crumb .crumb-current{color:var(--text-primary);font-weight:600}
+  .top-nav-agent-badge{
+    margin-left:auto;
+    font-size:11px;
+    font-weight:600;
+    padding:3px 10px;
+    border-radius:12px;
+    background:var(--accent-bg);
+    color:var(--accent);
+    border:1px solid var(--accent-border);
+    letter-spacing:0.04em
+  }
+  body  {
+    padding-top:42px;
+    font-family:var(--font-sans);
+    background:var(--bg);
+    color:var(--text-primary);
+    min-height:100vh;
+    display:grid;
+    grid-template-columns:260px 1fr;
+    grid-template-rows:calc(300vh - 42px);
+    overflow:scroll
+  }
+  .sidebar{
+    background:var(--surface-1);
+    border-right:1px solid var(--border);
+    display:flex;
+    flex-direction:column;
+    overflow:scroll
+  }
+  .sidebar-head{
+    padding:16px;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    gap:10px;flex-shrink:0
+  }
+  .logo-mark{
+    width:32px;
+    height:32px;
+    border-radius:8px;
+    background:var(--brand);
+    border:1px solid var(--accent-border);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0
+  }
+  .logo-mark span{
+    color:var(--accent);
+    font-size:13px;font-weight:700
+  }
+  .pub-name{
+    font-size:13px;
+     font-weight:600
+  }
+  .pub-sub{
+    font-size:11px;
+    color:var(--text-muted);
+    margin-top:1px
+  }
+  .agent-card{
+    margin:12px;
+    padding:12px;
+    background:var(--accent-bg);
+    border:1px solid var(--accent-border);
+    border-radius:var(--radius);
+    flex-shrink:0
+  }
+  .agent-name{
+    font-size:13px;font-weight:700;color:var(--accent);display:flex;align-items:center;gap:6px
+  }
+  .agent-role{
+    font-size:11px;color:var(--text-secondary);margin-top:3px
+  }
+  .pipeline-badge{
+    font-size:10px;font-weight:600;letter-spacing:0.07em;background:var(--surface-3);color:var(--text-muted);border:1px solid var(--border);border-radius:4px;padding:2px 6px;margin-top:8px;display:inline-block
+  }
+  .pipeline-label{
+    font-size:10px;color:var(--text-muted);padding:14px 16px 6px;letter-spacing:0.08em;text-transform:uppercase;flex-shrink:0
+  }
+  .pipeline-steps{
+    padding:0 12px;flex-shrink:0
+  }
+
+  .step{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:6px 8px;
+    border-radius:var(--radius);
+    font-size:12px;
+    color:var(--text-muted)
+  }
+  .step.active{color:var(--accent);background:var(--accent-bg)}
+  .step.done{color:var(--success)}
+  .step-dot{width:8px;height:8px;border-radius:50%;background:var(--border-strong);flex-shrink:0}
+  .step.active .step-dot{background:var(--accent)}
+  .step.done .step-dot{background:var(--success)}
+
+  .session-section{
+    margin:0 12px 12px;
+    padding:10px 12px;
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    flex-shrink:0
+  }
+  .session-row{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--text-secondary);margin-bottom:4px}
+  .session-row:last-child{margin-bottom:0}
+  .session-val{color:var(--text-primary);font-weight:500}
+  .status-badge{font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px}
+  .status-badge.idle{background:var(--surface-3);color:var(--text-muted)}
+  .status-badge.running{background:var(--accent-bg);color:var(--accent)}
+  .status-badge.done{background:var(--success-bg);color:var(--success)}
+  .status-badge.error{background:var(--danger-bg);color:var(--danger)}
+  .sidebar-spacer{flex:1}
+  .sidebar-footer{padding:12px;border-top:1px solid var(--border);flex-shrink:0}
+  
+  .footer-link{
+    display:flex;
+    align-items:center;
+    gap:6px;font-size:11px;
+    color:var(--text-muted);
+    text-decoration:none;
+    padding:5px 6px;
+    border-radius:var(--radius);
+    transition:background 0.1s,color 0.1s
+  }
+  .footer-link:hover{background:var(--surface-2);color:var(--text-secondary)}
+
+  .main{
+    display:flex;
+    flex-direction:column;
+    overflow:scroll
+  }
+  .topbar{
+    padding:14px 24px;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-shrink:0
+  }
+  .topbar-title{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px}
+  .topbar-title i{color:var(--accent);font-size:16px}
+  .topbar-meta{font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:14px}
+  
+  .content-area{
+    flex:1;
+    overflow-y:auto;
+    padding:24px;
+    display:flex;
+    flex-direction:column;
+    gap:16px
+  }
+  .card{
+    background:var(--surface-1);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    overflow:scroll
+  }
+  .card-header{
+    padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between
+  }
+  .card-title{
+    font-size:12px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.07em;display:flex;align-items:center;gap:6px
+  }
+  .card-title i{font-size:14px}.card-body{padding:16px}
+  .field{margin-bottom:14px}
+  .field:last-child{margin-bottom:0}
+  .field-label{
+    font-size:11px;
+    font-weight:600;
+    color:var(--text-secondary);
+    text-transform:uppercase;
+    letter-spacing:0.07em;
+    margin-bottom:6px;
+    display:flex;
+    align-items:center;
+    gap:5px
+  }
+  .field-hint{font-size:11px;color:var(--text-muted);margin-top:4px}
+  .field input[type=text]{
+    width:100%;
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    color:var(--text-primary);
+    font-size:13px;
+    padding:8px 10px;
+    outline:none;
+    transition:border-color 0.15s;
+    font-family:var(--font-sans)
+  }
+  .field input[type=text]:focus{border-color:var(--accent)}
+  .field input[type=text]::placeholder{color:var(--text-muted)}
+  .field input.mono{font-family:var(--font-mono);font-size:12px}
+
+  .url-grid{display:grid;gap:10px}
+  .url-row{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center}
+  .url-badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;white-space:nowrap;letter-spacing:0.05em}
+  .url-badge.sa{background:rgba(248,81,73,0.12);color:#f85149;border:1px solid rgba(248,81,73,0.3)}
+  .url-badge.dig{background:rgba(79,195,247,0.12);color:#4fc3f7;border:1px solid rgba(79,195,247,0.3)}
+  .url-badge.pg{background:rgba(63,185,80,0.12);color:#3fb950;border:1px solid rgba(63,185,80,0.3)}
+  .url-status{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+
+  .meta-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .btn-generate{width:100%;padding:10px 16px;background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:var(--radius);color:var(--accent);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background 0.1s}
+  .btn-generate:hover:not(:disabled){background:rgba(79,195,247,0.14)}
+  .btn-generate:disabled{opacity:0.4;cursor:not-allowed}
+  .spinner{width:14px;height:14px;border:2px solid var(--accent-border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite;display:none}
+  
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .output-card{
+    background:var(--surface-1);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    overflow:scroll;
+    display:none
+  }
+  .output-card.visible{display:block}
+  .output-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .output-label{font-size:12px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.07em;display:flex;align-items:center;gap:6px}
+  .output-actions{display:flex;gap:8px}
+  .btn-action{
+    font-size:11px;
+    font-weight:600;
+    padding:5px 10px;
+    border-radius:var(--radius);
+    border:1px solid var(--border);
+    background:var(--surface-2);
+    color:var(--text-secondary);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:5px;
+    transition:background 0.1s,border-color 0.1s
+  }
+  .btn-action:hover{background:var(--surface-3);border-color:var(--border-strong)}
+  .btn-action.primary{background:var(--accent-bg);border-color:var(--accent-border);color:var(--accent)}
+  .btn-action.primary:hover{background:rgba(79,195,247,0.14)}
+  .output-filename{padding:8px 16px;background:var(--surface-2);border-bottom:1px solid var(--border);font-size:11px;font-family:var(--font-mono);color:var(--text-muted);display:flex;align-items:center;gap:6px}
+  .output-body{padding:20px;max-height:500px;overflow-y:auto}
+  .output-text{font-family:var(--font-voice);font-size:13px;line-height:1.75;color:var(--text-primary);white-space:pre-wrap;word-break:break-word}
+  .error-box{background:var(--danger-bg);border:1px solid rgba(248,81,73,0.3);border-radius:var(--radius);padding:12px 14px;font-size:12px;color:var(--danger);display:none}
+  .error-box.visible{display:block}
+  .info-callout{background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:var(--radius);padding:10px 14px;font-size:12px;color:var(--text-secondary);display:flex;align-items:flex-start;gap:8px}
+  .info-callout i{color:var(--accent);font-size:14px;flex-shrink:0;margin-top:1px}
+  .progress-log{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;font-size:11px;font-family:var(--font-mono);color:var(--text-secondary);max-height:120px;overflow-y:auto;display:none}
+  .progress-log.visible{display:block}
+  .progress-line{padding:2px 0;display:flex;align-items:center;gap:6px}
+
+  ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:3px}
+  
+</style>
+</head>
+<body>
+
+<div class="nav-drawer-overlay" id="nav-overlay" onclick="closeNav()"></div>
+<nav class="nav-drawer" id="nav-drawer">
+  <div class="nav-drawer-head">
+    <div class="nav-drawer-logo"><div class="nav-drawer-logo-mark"><span>CS</span></div><div><div class="nav-drawer-title">CyberSense Ops</div><div class="nav-drawer-sub">Agent Navigation</div></div></div>
+    <button class="nav-drawer-close" onclick="closeNav()"><i class="ti ti-x"></i></button>
+  </div>
+  <div class="nav-drawer-body">
+    <div class="nav-pipeline-label">Intel Brief Pipeline</div>
+    <a class="nav-agent-row" href="/agents/intel-brief/james.html"><div class="nav-agent-icon"><i class="ti ti-pencil"></i></div><div class="nav-agent-info"><div class="nav-agent-name">James</div><div class="nav-agent-role">Acquisitions Editor</div></div><div class="nav-status-pip pip-live"></div></a>
+    <a class="nav-agent-row" href="/agents/intel-brief/jason.html"><div class="nav-agent-icon"><i class="ti ti-file-text"></i></div><div class="nav-agent-info"><div class="nav-agent-name">Jason</div><div class="nav-agent-role">Developmental Editor</div></div><div class="nav-status-pip pip-live"></div></a>
+    <a class="nav-agent-row" href="/agents/intel-brief/rob.html"><div class="nav-agent-icon"><i class="ti ti-crown"></i></div><div class="nav-agent-info"><div class="nav-agent-name">Rob</div><div class="nav-agent-role">Editor in Chief</div></div><div class="nav-status-pip pip-live"></div></a>
+    <a class="nav-agent-row" href="/agents/design/maya.html"><div class="nav-agent-icon"><i class="ti ti-photo"></i></div><div class="nav-agent-info"><div class="nav-agent-name">Maya</div><div class="nav-agent-role">Graphic Designer</div></div><div class="nav-status-pip pip-live"></div></a>
+    <span class="nav-agent-row nav-disabled"><div class="nav-agent-icon"><i class="ti ti-layout"></i></div><div class="nav-agent-info"><div class="nav-agent-name">Mary</div><div class="nav-agent-role">UI Developer</div></div><div class="nav-status-pip pip-planned"></div></span>
+    <span class="nav-agent-row nav-disabled"><div class="nav-agent-icon"><i class="ti ti-upload"></i></div><div class="nav-agent-info"><div class="nav-agent-name">Ethan</div><div class="nav-agent-role">Publisher</div></div><div class="nav-status-pip pip-planned"></div></span>
+    <div class="nav-pipeline-label">Daily Brief Pipeline</div>
+    <a class="nav-agent-row nav-active" href="/agents/daily-brief/ruth.html"><div class="nav-agent-icon"><i class="ti ti-pencil"></i></div><div class="nav-agent-info"><div class="nav-agent-name">Ruth</div><div class="nav-agent-role">Acquisitions Editor</div></div><div class="nav-status-pip pip-live"></div></a>
+    <span class="nav-agent-row nav-disabled"><div class="nav-agent-icon"><i class="ti ti-file-text"></i></div><div class="nav-agent-info"><div class="nav-agent-name">Peter</div><div class="nav-agent-role">Developmental Editor</div></div><div class="nav-status-pip pip-planned"></div></span>
+    <span class="nav-agent-row nav-disabled"><div class="nav-agent-icon"><i class="ti ti-crown"></i></div><div class="nav-agent-info"><div class="nav-agent-name">Ed</div><div class="nav-agent-role">Editor in Chief</div></div><div class="nav-status-pip pip-planned"></div></span>
+    <span class="nav-agent-row nav-disabled"><div class="nav-agent-icon"><i class="ti ti-layout"></i></div><div class="nav-agent-info"><div class="nav-agent-name">Kirby</div><div class="nav-agent-role">UI Developer</div></div><div class="nav-status-pip pip-planned"></div></span>
+    <span class="nav-agent-row nav-disabled"><div class="nav-agent-icon"><i class="ti ti-upload"></i></div><div class="nav-agent-info"><div class="nav-agent-name">Lucy</div><div class="nav-agent-role">Publisher</div></div><div class="nav-status-pip pip-planned"></div></span>
+  </div>
+  <div class="nav-drawer-foot">
+    <a class="nav-drawer-foot-link" href="/"><i class="ti ti-layout-dashboard" style="font-size:14px"></i> Ops Dashboard</a>
+    <a class="nav-drawer-foot-link" href="https://cybersense.solutions" target="_blank"><i class="ti ti-external-link" style="font-size:14px"></i> cybersense.solutions</a>
+  </div>
+</nav>
+
+<div class="top-nav">
+  <button class="top-nav-btn" onclick="openNav()"><i class="ti ti-menu-2"></i></button>
+  <div class="top-nav-crumb"><a href="/">Ops</a><i class="ti ti-chevron-right" style="font-size:10px;color:var(--text-muted)"></i><span class="crumb-current">Ruth — Acquisitions Editor</span></div>
+  <div class="top-nav-agent-badge">Daily Brief · Stage 1</div>
+</div>
+
+<aside class="sidebar">
+  <div class="sidebar-head"><div class="logo-mark"><span>CS</span></div><div><div class="pub-name">CyberSense Ops</div><div class="pub-sub">Daily Brief Pipeline</div></div></div>
+  <div class="agent-card"><div class="agent-name"><i class="ti ti-pencil"></i> Ruth</div><div class="agent-role">Acquisitions Editor</div><div class="pipeline-badge">DAILY BRIEF · STAGE 1 OF 5</div></div>
+  <div class="pipeline-label">Pipeline Stages</div>
+  <div class="pipeline-steps">
+    <div class="step active"><div class="step-dot"></div><span>Ruth — Acquisitions Editor</span></div>
+    <div class="step"><div class="step-dot"></div><span>Peter — Developmental Editor</span></div>
+    <div class="step"><div class="step-dot"></div><span>Ed — Editor in Chief</span></div>
+    <div class="step"><div class="step-dot"></div><span>Kirby — UI Developer</span></div>
+    <div class="step"><div class="step-dot"></div><span>Lucy — Publisher</span></div>
+  </div>
+  <div class="pipeline-label" style="margin-top:12px;">Session</div>
+  <div class="session-section">
+    <div class="session-row"><span>Status</span><span class="status-badge idle" id="status-badge">Idle</span></div>
+    <div class="session-row"><span>Edition</span><span class="session-val" id="session-edition">—</span></div>
+    <div class="session-row"><span>Date</span><span class="session-val" id="session-date">—</span></div>
+    <div class="session-row"><span>URLs loaded</span><span class="session-val" id="session-urls">0 / 6</span></div>
+  </div>
+  <div class="sidebar-spacer"></div>
+  <div class="sidebar-footer">
+    <a class="footer-link" href="/agents/intel-brief/rob.html"><i class="ti ti-arrow-left" style="font-size:13px"></i> Intel Brief (Rob)</a>
+    <a class="footer-link" href="/" style="margin-top:2px;"><i class="ti ti-layout-dashboard" style="font-size:13px"></i> Ops Dashboard</a>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title"><i class="ti ti-pencil"></i> Acquisitions Editor — Daily Brief Outline</div>
+    <div class="topbar-meta"><span>Input: 5 Articles + 1 PG URL</span><span>Output: Ruth .txt</span><span>Stage 1 of 5</span></div>
+  </div>
+  <div class="content-area">
+
+    <div class="info-callout"><i class="ti ti-link"></i><span>Enter the URLs for today's five articles and one Professional Growth resource. Ruth fetches each article and produces the complete edition outline including the four binding anchors: Edition Title, Daily Theme, Training Byte, and Closing Statement.</span></div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title"><i class="ti ti-world"></i> Article URLs</div><span style="font-size:11px;color:var(--text-muted)">Ruth fetches content automatically</span></div>
+      <div class="card-body">
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:12px;display:flex;gap:16px;">
+          <span style="display:flex;align-items:center;gap:5px;"><span class="url-badge sa">SA</span> Situational Awareness</span>
+          <span style="display:flex;align-items:center;gap:5px;"><span class="url-badge dig">DIG</span> Development · Innovation · Governance</span>
+          <span style="display:flex;align-items:center;gap:5px;"><span class="url-badge pg">PG</span> Professional Growth</span>
+        </div>
+        <div class="url-grid" id="url-grid">
+          <div class="url-row"><span class="url-badge sa">SA 1</span><div class="field" style="margin:0"><input type="text" id="url-0" placeholder="https://cybersense.solutions/articles/..." oninput="updateUrlCount()"></div><div class="url-status" id="status-0"></div></div>
+          <div class="url-row"><span class="url-badge sa">SA 2</span><div class="field" style="margin:0"><input type="text" id="url-1" placeholder="https://cybersense.solutions/articles/..." oninput="updateUrlCount()"></div><div class="url-status" id="status-1"></div></div>
+          <div class="url-row"><span class="url-badge sa">SA 3</span><div class="field" style="margin:0"><input type="text" id="url-2" placeholder="https://cybersense.solutions/articles/..." oninput="updateUrlCount()"></div><div class="url-status" id="status-2"></div></div>
+          <div class="url-row"><span class="url-badge dig">DIG 1</span><div class="field" style="margin:0"><input type="text" id="url-3" placeholder="https://cybersense.solutions/articles/..." oninput="updateUrlCount()"></div><div class="url-status" id="status-3"></div></div>
+          <div class="url-row"><span class="url-badge dig">DIG 2</span><div class="field" style="margin:0"><input type="text" id="url-4" placeholder="https://cybersense.solutions/articles/..." oninput="updateUrlCount()"></div><div class="url-status" id="status-4"></div></div>
+          <div class="url-row"><span class="url-badge pg">PG</span><div class="field" style="margin:0"><input type="text" id="url-5" placeholder="https://govinfosecurity.com/webinars/..." oninput="updateUrlCount()"></div><div class="url-status" id="status-5"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title"><i class="ti ti-tag"></i> Edition Metadata</div></div>
+      <div class="card-body">
+        <div class="meta-row">
+          <div class="field"><div class="field-label">Edition Number</div><input type="text" id="edition-num" placeholder="166" oninput="updateSession()"></div>
+          <div class="field"><div class="field-label">Publication Date</div><input type="text" id="edition-date" placeholder="July 11, 2026" oninput="updateSession()"></div>
+        </div>
+        <div class="field">
+          <div class="field-label">Output Slug</div>
+          <input type="text" id="output-slug" class="mono" placeholder="edition-166" oninput="updateFilename()">
+          <div class="field-hint">Used in output filename — e.g. <code style="font-family:var(--font-mono);font-size:11px;">20260711_ruth_edition-166_v1.txt</code></div>
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <div class="field-label">Output Filename Preview</div>
+          <div style="font-family:var(--font-mono);font-size:12px;color:var(--accent);background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;" id="filename-preview">YYYYMMDD_ruth_slug_v1.txt</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="progress-log" id="progress-log"></div>
+
+    <button class="btn-generate" id="btn-generate" onclick="runRuth()">
+      <div class="spinner" id="spinner"></div>
+      <i class="ti ti-database-import" id="btn-icon" style="font-size:15px"></i>
+      <span id="btn-label">Fetch Articles &amp; Generate Outline</span>
+    </button>
+
+    <div class="error-box" id="error-box"></div>
+
+    <div class="output-card" id="output-card">
+      <div class="output-header">
+        <div class="output-label"><i class="ti ti-file-check"></i> Edition Outline — Ready for Peter</div>
+        <div class="output-actions">
+          <button class="btn-action" id="btn-copy" onclick="copyOutput()"><i class="ti ti-copy" style="font-size:13px"></i> Copy</button>
+          <button class="btn-action primary" onclick="downloadOutput()"><i class="ti ti-download" style="font-size:13px"></i> Download .txt</button>
+        </div>
+      </div>
+      <div class="output-filename"><i class="ti ti-file-text"></i><span id="filename-display">ruth_output.txt</span></div>
+      <div class="output-body"><div class="output-text" id="output-text"></div></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const SYSTEM_PROMPT = `CyberSense: Daily Digital Awareness Brief for 
+Acquisitions Editor
+Agent Script — Input, Unification & Outline Protocol
+
+
+Role
+You are the Acquisitions Editor for CyberSense: Daily Digital Awareness Brief, a daily professional intelligence newsletter focused on workforce cyber awareness, institutional resilience, and human-centric risk. You operate upstream of writing and are responsible for identifying content that is timely, credible, and directly relevant to digital awareness and professional decision-making. Do not generate prose; only provide a structured outline suitable for editorial drafting.
+
+Primary Task
+Using the inputs provided below, produce a complete Daily Digital Awareness Brief outline. Your primary responsibility is unification: all content — Situational Awareness entries, Professional Growth, DIG: Development · Innovation · Governance, Training Byte, and Closing Statement — must cohere around a single daily theme. You derive and output four unifying anchors that govern the edition:
+
+Edition Title — a proposed headline for the day's edition that captures the unifying theme
+Daily Theme — the thematic thread that connects all content, stated and justified
+Training Byte — the complete four-part micro-lesson (What You Need to Know, Defensive Actions, Why This Matters, Closing Quote), fully anchored to the theme
+Edition-Level Closing Statement — a sign-off passage that the Developmental Editor and Editor-in-Chief will use as the tonal and thematic anchor for the newsletter's close
+
+Downstream editors (Developmental & Structural Editor, Editor-in-Chief) will build from these four anchors to ensure full editorial alignment across the publication.
+
+Additionally produce:
+Three Situational Awareness entries drawn from the CyberSense.Solutions articles provided
+One Professional Growth entry sourced from the URL provided
+Two DIG: Development · Innovation · Governance entries drawn from the CyberSense.Solutions articles provided
+
+Each selected item must be justified with a one-sentence rationale linking it to the newsletter mission and the day's unified theme.
+
+
+SECTION 1 — UNIFICATION OUTPUTS
+
+Complete this section FIRST, after reviewing all input articles. These four outputs govern every downstream editorial decision. The Developmental Editor and Editor-in-Chief will use the Edition Title, Theme, Training Byte, and Closing Statement as binding anchors for the full publication.
+
+1A — PROPOSED EDITION TITLE
+Derive a concise, compelling headline for the day's edition. It should name the unifying theme in a way that is accessible to a cross-functional professional audience — not a technical description, but a framing that captures the operational stakes. One phrase or short sentence.
+EDITION TITLE
+[Proposed edition headline — e.g., 'When the tools you trust become the threat']
+TITLE RATIONALE
+[One sentence explaining how this title captures the unifying theme across all five input articles]
+
+1B — DAILY THEME
+State the unifying thematic thread that connects the Situational Awareness entries, Training Byte, Career Development, and DIG: Development · Innovation · Governance. The theme must be supportable by all selected content collectively — not just the dominant story.
+DAILY THEME
+[One concise phrase — e.g., 'Trusted infrastructure as the primary attack surface']
+THEME JUSTIFICATION
+[Two to three sentences explaining how the selected articles and Training Byte collectively support this theme. Reference each section by name.]
+
+1C — TRAINING BYTE
+Generate the complete Training Byte micro-lesson anchored to today's theme. This is an original synthesis — it is not sourced from a single article but derived from the collective intelligence of the edition's content. All four fields are required. Do not generate prose; provide outline-ready structured fields only.
+
+TOPIC
+[The specific cyber awareness topic tied to today's theme — one phrase or sentence]
+WHAT YOU NEED TO KNOW
+[Describe the threat, behavior, or concept in plain terms. No jargon without definition. Target a cross-functional professional audience — not a technical specialist.]
+DEFENSIVE ACTIONS
+[2–4 concrete, actionable steps using imperative verbs. Stratify by role: Individual / Team Lead / Security Team.]
+WHY THIS MATTERS
+[1–2 sentences connecting the topic to real-world consequences: operational risk, compliance exposure, financial impact, or reputational harm. No sensationalism.]
+CLOSING QUOTE
+[Attributed quote from a credible, verifiable source — security practitioner, researcher, executive, or authoritative body — that captures the spirit of the lesson. Must be real and verifiable. Avoid generic aphorisms.]
+TRAINING BYTE RATIONALE
+[One sentence linking this Training Byte to the newsletter mission and today's daily theme]
+
+1D — EDITION-LEVEL CLOSING STATEMENT
+Provide the thematic anchor for the newsletter's close. This is NOT a full drafted paragraph — it is a structured brief that the Developmental Editor will use to write the closing passage. Include the thematic thread to reinforce, the tone to maintain, and a proposed closing line or key phrase.
+
+THEMATIC THREAD TO REINFORCE
+[The core idea the closing should bring home — one sentence restating the day's central insight in terms of institutional consequence]
+TONE DIRECTIVE
+[The emotional register the closing should hold: e.g., grounded urgency, measured confidence, proportional alarm, forward-looking resolve. One phrase.]
+PROPOSED CLOSING LINE / KEY PHRASE
+[A single memorable line that the Editor-in-Chief can use verbatim or adapt as the edition's final statement — parallel to the closing key phrases used in Detailed Articles]
+CLOSING RATIONALE
+[One sentence explaining how this closing anchors the edition thematically and maintains alignment with the newsletter's voice]
+
+
+SECTION 2 — SITUATIONAL AWARENESS
+
+Paste the full text of three published CyberSense.Solutions articles. These serve as the Situational Awareness entries. Select the three most timely and thematically aligned from the articles provided. Extract the headline, distill a one-sentence summary, and provide an editorial rationale for each.
+
+Selection note: If more than three articles are provided, select the three that carry the strongest combination of recency, direct threat relevance, and thematic alignment with the Edition Title and Daily Theme derived in Section 1.
+
+Article #1
+[Full article text retrieved from URL — provided by system]
+
+HEADLINE
+[Extract and confirm the article headline]
+ONE-SENTENCE SUMMARY
+[Distill the article's core finding into one sentence for editorial review]
+RATIONALE
+[One sentence linking this article to today's daily theme and newsletter mission]
+
+
+Article #2
+[Full article text retrieved from URL — provided by system]
+
+HEADLINE
+[Extract and confirm the article headline]
+ONE-SENTENCE SUMMARY
+[Distill the article's core finding into one sentence for editorial review]
+RATIONALE
+[One sentence linking this article to today's daily theme and newsletter mission]
+
+
+Article #3
+[Full article text retrieved from URL — provided by system]
+
+HEADLINE
+[Extract and confirm the article headline]
+ONE-SENTENCE SUMMARY
+[Distill the article's core finding into one sentence for editorial review]
+RATIONALE
+[One sentence linking this article to today's daily theme and newsletter mission]
+
+
+SECTION 3 — PROFESSIONAL GROWTH
+URL: [Professional Growth URL — provided by system]
+
+HEADLINE / TITLE: [Extract from resource]
+ONE-SENTENCE SUMMARY: [Distill the resource's core value in one sentence]
+RESOURCE TYPE: [Webinar / Article / Course / Certification / Other]
+TARGET AUDIENCE: [Role-based audience description]
+ROI JUSTIFICATION: [One to two sentences on professional value and career ROI]
+RATIONALE: [One sentence linking this resource to the newsletter mission and today's theme]
+
+
+SECTION 4 — DIG: DEVELOPMENT · INNOVATION · GOVERNANCE
+
+Article #4
+[Full article text retrieved from URL — provided by system]
+
+HEADLINE
+[Extract and confirm the article headline]
+ONE-SENTENCE SUMMARY
+[Distill the article's core finding into one sentence for editorial review]
+RATIONALE
+[One sentence linking this article to today's daily theme and newsletter mission]
+
+
+Article #5
+[Full article text retrieved from URL — provided by system]
+
+HEADLINE
+[Extract and confirm the article headline]
+ONE-SENTENCE SUMMARY
+[Distill the article's core finding into one sentence for editorial review]
+RATIONALE
+[One sentence linking this article to today's daily theme and newsletter mission]
+
+
+SECTION 5 — ESCALATION AND ANNOTATION
+[Provide any critical flags, escalation notes, or editorial annotations for downstream editors]`;
+
+let outputText = '';
+
+function updateUrlCount() {
+  let filled = 0;
+  for(let i=0;i<6;i++) { if(document.getElementById('url-'+i).value.trim()) filled++; }
+  document.getElementById('session-urls').textContent = filled + ' / 6';
+  updateFilename();
+}
+
+function updateSession() {
+  const ed = document.getElementById('edition-num').value.trim();
+  const dt = document.getElementById('edition-date').value.trim();
+  document.getElementById('session-edition').textContent = ed ? 'Edition ' + ed : '—';
+  document.getElementById('session-date').textContent = dt || '—';
+  updateFilename();
+}
+
+function updateFilename() {
+  const date = document.getElementById('edition-date').value.trim();
+  const slug = document.getElementById('output-slug').value.trim().toLowerCase().replace(/[^a-z0-9-]/g,'-').replace(/-+/g,'-') || 'slug';
+  let dateStr = 'YYYYMMDD';
+  if(date) { const d=new Date(date); if(!isNaN(d)) { dateStr=d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0'); } }
+  const fname = `${dateStr}_ruth_${slug}_v1.txt`;
+  document.getElementById('filename-preview').textContent = fname;
+  document.getElementById('filename-display').textContent = fname;
+}
+
+function log(msg, icon='ti-circle') {
+  const log = document.getElementById('progress-log');
+  log.classList.add('visible');
+  const line = document.createElement('div');
+  line.className = 'progress-line';
+  line.innerHTML = `<i class="ti ${icon}" style="font-size:12px;color:var(--text-muted)"></i><span>${msg}</span>`;
+  log.appendChild(line);
+  log.scrollTop = log.scrollHeight;
+}
+
+async function fetchArticle(url, idx) {
+  const labels = ['SA 1','SA 2','SA 3','DIG 1','DIG 2','PG'];
+  log(`Fetching ${labels[idx]}: ${url.substring(0,60)}...`,'ti-loader');
+  const res = await fetch('/api/fetch', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({url})
+  });
+  if(!res.ok) throw new Error(`Failed to fetch ${labels[idx]}`);
+  const data = await res.json();
+  document.getElementById('status-'+idx).innerHTML = '<i class="ti ti-check" style="color:var(--success)"></i>';
+  log(`${labels[idx]} loaded (${data.text.length.toLocaleString()} chars)`,'ti-check');
+  return data.text;
+}
+
+async function runRuth() {
+  const urls = [];
+  for(let i=0;i<6;i++) {
+    const v = document.getElementById('url-'+i).value.trim();
+    if(!v) { alert(`Please enter URL for slot ${i+1}`); return; }
+    urls.push(v);
+  }
+
+  setRunning(true);
+  clearOutput();
+  document.getElementById('progress-log').innerHTML = '';
+
+  try {
+    // Fetch all 6 URLs
+    const texts = [];
+    for(let i=0;i<6;i++) {
+      const text = await fetchArticle(urls[i], i);
+      texts.push(text);
+    }
+
+    log('All articles fetched — building edition outline...','ti-wand');
+
+    // Build user message with all article content
+    const userMsg = `Today's Edition Input
+
+PUBLICATION DATE: ${document.getElementById('edition-date').value.trim() || 'Today'}
+EDITION NUMBER: ${document.getElementById('edition-num').value.trim() || 'TBD'}
+
+SITUATIONAL AWARENESS ARTICLES (SA 1, SA 2, SA 3)
+These three articles are candidates for the Situational Awareness section.
+Ruth selects the three most timely and thematically aligned.
+
+SA Article 1 — URL: ${urls[0]}
+${texts[0].substring(0,8000)}
+
+---
+
+SA Article 2 — URL: ${urls[1]}
+${texts[1].substring(0,8000)}
+
+---
+
+SA Article 3 — URL: ${urls[2]}
+${texts[2].substring(0,8000)}
+
+---
+
+DIG ARTICLES — Development · Innovation · Governance (DIG 1, DIG 2)
+These two articles are for the DIG section covering deeper research, emerging technology, and regulatory/policy developments.
+
+DIG Article 1 — URL: ${urls[3]}
+${texts[3].substring(0,8000)}
+
+---
+
+DIG Article 2 — URL: ${urls[4]}
+${texts[4].substring(0,8000)}
+
+---
+
+PROFESSIONAL GROWTH RESOURCE — URL: ${urls[5]}
+${texts[5].substring(0,4000)}
+
+---
+
+Now produce the complete Daily Digital Awareness Brief outline following your Agent Script protocol. Complete Section 1 (Unification Outputs) FIRST, then Sections 2–5.`;
+
+    const res = await fetch('/api/brief', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-6',
+        max_tokens:8192,
+        system: SYSTEM_PROMPT,
+        messages:[{role:'user', content: userMsg}]
+      })
+    });
+
+    if(!res.ok) { const e=await res.json().catch(()=>({})); throw new Error(e?.error?.message||`API error ${res.status}`); }
+    const data = await res.json();
+    outputText = data.content.map(b=>b.text||'').join('');
+    log('Outline complete — ready for Peter','ti-circle-check');
+    showOutput(outputText);
+    setStatus('done');
+
+  } catch(e) {
+    showError(e.message);
+    setStatus('error');
+  }
+  setRunning(false);
+}
+
+function setRunning(on) {
+  document.getElementById('btn-generate').disabled = on;
+  document.getElementById('spinner').style.display = on?'block':'none';
+  document.getElementById('btn-icon').style.display = on?'none':'inline-block';
+  document.getElementById('btn-label').textContent = on?'Fetching articles…':'Fetch Articles & Generate Outline';
+  if(on) setStatus('running');
+}
+
+function setStatus(state) {
+  const b=document.getElementById('status-badge');
+  b.className='status-badge '+state;
+  b.textContent={idle:'Idle',running:'Fetching',done:'Done',error:'Error'}[state]||state;
+}
+
+function showOutput(text) {
+  const card=document.getElementById('output-card');
+  document.getElementById('output-text').textContent=text;
+  card.classList.add('visible');
+  card.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function clearOutput() {
+  document.getElementById('output-card').classList.remove('visible');
+  document.getElementById('output-text').textContent='';
+  document.getElementById('error-box').classList.remove('visible');
+  document.getElementById('error-box').textContent='';
+  outputText='';
+  for(let i=0;i<6;i++) document.getElementById('status-'+i).innerHTML='';
+}
+
+function showError(msg) { const b=document.getElementById('error-box'); b.textContent='Error: '+msg; b.classList.add('visible'); }
+
+function copyOutput() {
+  if(!outputText) return;
+  navigator.clipboard.writeText(outputText).then(()=>{
+    const btn=document.getElementById('btn-copy');
+    btn.innerHTML='<i class="ti ti-check" style="font-size:13px"></i> Copied';
+    setTimeout(()=>{btn.innerHTML='<i class="ti ti-copy" style="font-size:13px"></i> Copy';},2000);
+  });
+}
+
+function downloadOutput() {
+  if(!outputText) return;
+  const fname=document.getElementById('filename-display').textContent||'ruth_output.txt';
+  const blob=new Blob([outputText],{type:'text/plain'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=fname; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function openNav(){document.getElementById('nav-drawer').classList.add('open');document.getElementById('nav-overlay').classList.add('open');document.body.style.overflow='hidden';}
+function closeNav(){document.getElementById('nav-drawer').classList.remove('open');document.getElementById('nav-overlay').classList.remove('open');document.body.style.overflow='';}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeNav();});
+
+updateSession(); updateFilename(); updateUrlCount();
+</script>
+</body>
+</html>
