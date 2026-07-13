@@ -214,7 +214,23 @@
     <div class="error-box" id="error-box"></div>
 
     <!-- Output -->
-    <div class="output-card" id="output-card">
+    <!-- Raw extraction debug panel -->
+    <div id="raw-debug-card" style="display:none;background:var(--surface-1);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:0;">
+      <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-size:11px;font-weight:600;color:var(--warning);text-transform:uppercase;letter-spacing:0.07em;display:flex;align-items:center;gap:6px;">
+          <i class="ti ti-bug" style="font-size:13px"></i> Raw Extraction Output
+        </span>
+        <button onclick="document.getElementById('raw-debug-card').style.display='none'"
+          style="font-size:11px;padding:3px 8px;border-radius:4px;border:1px solid var(--border);background:var(--surface-2);color:var(--text-muted);cursor:pointer;">
+          Dismiss
+        </button>
+      </div>
+      <div style="padding:12px 14px;max-height:300px;overflow-y:auto;">
+        <pre id="raw-debug" style="font-family:var(--font-mono);font-size:11px;line-height:1.6;color:var(--text-secondary);white-space:pre-wrap;word-break:break-word;margin:0;"></pre>
+      </div>
+    </div>
+
+        <div class="output-card" id="output-card">
       <div class="output-header">
         <div class="output-label"><i class="ti ti-circle-check"></i> Newsletter HTML — Ready for Lucy</div>
         <div class="output-actions">
