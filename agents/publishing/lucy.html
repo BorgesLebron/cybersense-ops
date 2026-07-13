@@ -271,7 +271,7 @@ function runLucy() {
 
   try {
     // ── Extract current Featured block ────────────────────────────────────────
-    const featuredMatch = newsletterHTML.match(/<!-- ══ LEFT: LATEST EDITION ══ -->([\s\S]*?)<!-- ══ RIGHT: PREVIOUS EDITIONS ══ -->/);
+    const featuredMatch = newsletterHTML.match(/<!-- ══ LEFT: LATEST EDITION ══ -->([\s\S]*?)(?=<!-- ══ RIGHT: PREVIOUS EDITIONS ══ -->)/);
     if(!featuredMatch) throw new Error('Could not find Featured Edition block. Check newsletter.html structure.');
 
     const featuredBlock = featuredMatch[1];
@@ -280,11 +280,11 @@ function runLucy() {
     const curEditionBadge = featuredBlock.match(/nl-edition-badge">([^<]+)<\/span>/)?.[1] || '';
     const curDate         = featuredBlock.match(/nl-feat-date">([^<]+)<\/span>/)?.[1] || '';
     const curTheme        = featuredBlock.match(/nl-feat-theme">([^<]+)<\/h2>/)?.[1] || '';
-    const curSummary      = featuredBlock.match(/nl-feat-summary">\s*([\s\S]*?)\s*<\/p>/)?.[1]?.trim().replace(/\s+/g,' ') || '';
+    const curSummary      = featuredBlock.match(/nl-feat-summary">\s*([\s\S]*?)\s*<\/p>/)?.[1]?.trim().replace(/[\r\n\s]+/g,' ') || '';
     const curUrl          = featuredBlock.match(/nl-read-more" href="([^"]+)"/)?.[1] || '#';
 
     // ── Extract current Previous Editions cards ───────────────────────────────
-    const prevSection = newsletterHTML.match(/<!-- ══ RIGHT: PREVIOUS EDITIONS ══ -->([\s\S]*?)<\/div>\s*<\/div>\s*\n\n<!-- ══ ARCHIVE/);
+    const prevSection = newsletterHTML.match(/<!-- ══ RIGHT: PREVIOUS EDITIONS ══ -->([\s\S]*?)(?=<\/div><!-- \/nl-main -->)/);
     if(!prevSection) throw new Error('Could not find Previous Editions section.');
 
     const prevCards = [...prevSection[1].matchAll(/<a class="nl-prev-card" href="([^"]+)">([\s\S]*?)<\/a>/g)];
@@ -388,10 +388,11 @@ ${remainingPrevHTML}
     let updated = newsletterHTML;
 
     // 1. Replace featured + previous sections (find the full nl-main block)
-    updated = updated.replace(
-      /<!-- ══ LEFT: LATEST EDITION ══ -->[\s\S]*?<\/div><!-- \/nl-main -->/,
-      newFeatured + newPrevSection
-    );
+    // Replace the full nl-main content
+    const nlMainStart = updated.indexOf('<!-- ══ LEFT: LATEST EDITION ══ -->');
+    const nlMainEnd   = updated.indexOf('</div><!-- /nl-main -->') + '</div><!-- /nl-main -->'.length;
+    if (nlMainStart < 0 || nlMainEnd < 0) throw new Error('Could not find nl-main boundaries.');
+    updated = updated.substring(0, nlMainStart) + newFeatured + newPrevSection + updated.substring(nlMainEnd);
 
     // 2. Insert archive entry at top of the relevant year array
     // Find the year array opening and insert after it
