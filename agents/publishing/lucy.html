@@ -152,7 +152,6 @@
             <div class="upload-zone-icon"><i class="ti ti-file-code"></i></div>
             <div><div class="upload-zone-text"><strong>Upload current newsletter.html</strong></div><div class="upload-zone-sub">from cybersense-solutions repo</div></div>
           </div>
-        </div>
       </div>
     </div>
 
@@ -190,18 +189,13 @@
     <div class="card">
       <div class="card-header"><div class="card-title"><i class="ti ti-archive"></i> Archive Entry (Oldest Previous → Archive)</div></div>
       <div class="card-body">
-        <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">The oldest card in Previous Editions will be pushed into the Archive data. Fill in its details below — Lucy reads the current newsletter.html to extract the oldest Previous card and adds it to the archive JavaScript object automatically. You only need to confirm the DOW (day of week).</p>
-        <div class="meta-row">
-          <div class="field">
+        <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">The oldest card in Previous Editions will be pushed into the Archive data. Lucy automatically extracts the oldest Previous card and derives the archive month key from its date. You only need to confirm the DOW (day of week) abbreviation.</p>
+        <div class="field">
             <div class="field-label">DOW of oldest Previous card</div>
             <input type="text" id="archive-dow" placeholder="Mon / Tue / Wed / Thu / Fri">
             <div class="field-hint">Day of week abbreviation for the archive entry</div>
           </div>
-          <div class="field">
-            <div class="field-label">Archive Year Group</div>
-            <input type="text" id="archive-year" placeholder="2026" value="2026">
-            <div class="field-hint">Year key in ARCHIVE_DATA object</div>
-          </div>
+
         </div>
       </div>
     </div>
@@ -373,35 +367,43 @@ ${remainingPrevHTML}
 </div><!-- /nl-main -->`;
 
     // ── Build archive entry for oldest prev card ───────────────────────────────
-    // Parse oldest prev card date for archive
-    const oldDate  = oldestPrev.pubDate.replace('Published ','') || '';
+    const oldDate  = oldestPrev.pubDate.replace('Published ','').trim() || '';
     const oldTitle = oldestPrev.title;
-    const oldBadge = oldestPrev.badge; // e.g. "Edition 162"
+    const oldBadge = oldestPrev.badge;
     const oldHref  = oldestPrev.href;
     const oldDOW   = val('archive-dow');
-    const oldYear  = val('archive-year') || '2026';
 
-    // New archive entry line
+    // Derive YYYY-MM key from date string e.g. "July 7, 2026" → "2026-07"
+    const _months = {January:'01',February:'02',March:'03',April:'04',May:'05',June:'06',
+                     July:'07',August:'08',September:'09',October:'10',November:'11',December:'12'};
+    const _dp = oldDate.match(/^(\w+)\s+\d+,\s+(\d{4})$/);
+    const monthKey   = _dp ? `${_dp[2]}-${_months[_dp[1]] || '07'}` : '2026-07';
+    const monthLabel = _dp ? `${_dp[1]} ${_dp[2]}` : 'July 2026';
+
+    // Archive entry matching exact ARCHIVE_DATA format
     const archiveEntry = `    { date:"${esc(oldDate)}", dow:"${esc(oldDOW)}", edition:"${esc(oldBadge)}", title:"${esc(oldTitle)}", href:"${esc(oldHref)}" },`;
 
     // ── Perform replacements ──────────────────────────────────────────────────
     let updated = newsletterHTML;
 
-    // 1. Replace featured + previous sections (find the full nl-main block)
-    // Replace the full nl-main content
+    // 1. Replace featured + previous sections
     const nlMainStart = updated.indexOf('<!-- ══ LEFT: LATEST EDITION ══ -->');
     const nlMainEnd   = updated.indexOf('</div><!-- /nl-main -->') + '</div><!-- /nl-main -->'.length;
     if (nlMainStart < 0 || nlMainEnd < 0) throw new Error('Could not find nl-main boundaries.');
     updated = updated.substring(0, nlMainStart) + newFeatured + newPrevSection + updated.substring(nlMainEnd);
 
-    // 2. Insert archive entry at top of the relevant year array
-    // Find the year array opening and insert after it
-    const yearArrayPattern = new RegExp(`(${oldYear}:\\s*\\[\\s*\\n)`);
-    if(yearArrayPattern.test(updated)) {
-      updated = updated.replace(yearArrayPattern, `$1    ${archiveEntry}\n`);
+    // 2. Insert archive entry at top of correct YYYY-MM month entries array
+    // Matches: "2026-07": { label:"July 2026", entries:[
+    const monthMarker = `"${monthKey}": {`;
+    const mIdx = updated.indexOf(monthMarker);
+    if (mIdx >= 0) {
+      // Find "entries:[" after the month marker and insert right after
+      const entriesIdx = updated.indexOf('entries:[', mIdx) + 'entries:['.length;
+      updated = updated.substring(0, entriesIdx) + '\n' + archiveEntry + updated.substring(entriesIdx);
     } else {
-      // If year not found, try to insert before the closing of ARCHIVE_DATA
-      updated = updated.replace('};', `  ${oldYear}: [\n    ${archiveEntry}\n  ],\n};`);
+      // Month key not found — prepend a new month block inside ARCHIVE_DATA
+      const newMonthBlock = `  "${monthKey}": { label:"${monthLabel}", entries:[\n${archiveEntry}\n  ]},\n`;
+      updated = updated.replace('const ARCHIVE_DATA = {', 'const ARCHIVE_DATA = {\n' + newMonthBlock);
     }
 
     outputHTML = updated;
