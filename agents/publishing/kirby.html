@@ -349,7 +349,8 @@ function updateFilename() {
 // ── Tagged-format parser (immune to quote/escape issues) ─────────────────────
 function parseTagged(raw) {
   function get(tag) {
-    const m = raw.match(new RegExp(`<${tag}>([\s\S]*?)<\/${tag}>`));
+    // FIXED: Correctly escaped the regular expression backslashes to process dynamic text capture properly
+    const m = raw.match(new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`));
     if (!m) return '';
     // Strip any accidental "REPLACE WITH:" prefix if model echoed the instruction
     return m[1].trim().replace(/^REPLACE WITH:\s*/i, '');
