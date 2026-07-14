@@ -20,20 +20,42 @@
     --font-sans:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
     --font-mono:'SF Mono','Fira Code',monospace;
   }
-  .nav-drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(2px);z-index:900;opacity:0;pointer-events:none;transition:opacity 0.2s}.nav-drawer-overlay.open{opacity:1;pointer-events:all}
-  .nav-drawer{position:fixed;top:0;left:0;bottom:0;width:320px;background:var(--surface-1);border-right:1px solid var(--border);z-index:901;display:flex;flex-direction:column;transform:translateX(-100%);transition:transform 0.22s cubic-bezier(0.4,0,0.2,1);overflow:scroll}.nav-drawer.open{transform:translateX(0)}
+  .nav-drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(2px);z-index:900;opacity:0;pointer-events:none;transition:opacity 0.2s}
+  .nav-drawer-overlay.open{opacity:1;pointer-events:all}
+  .nav-drawer{position:fixed;top:0;left:0;bottom:0;width:320px;background:var(--surface-1);border-right:1px solid var(--border);z-index:901;display:flex;flex-direction:column;transform:translateX(-100%);transition:transform 0.22s cubic-bezier(0.4,0,0.2,1);overflow:scroll}
+  .nav-drawer.open{transform:translateX(0)}
   .nav-drawer-head{padding:16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-  .nav-drawer-logo{display:flex;align-items:center;gap:10px}.nav-drawer-logo-mark{width:30px;height:30px;border-radius:7px;background:var(--brand);border:1px solid var(--accent-border);display:flex;align-items:center;justify-content:center}.nav-drawer-logo-mark span{color:var(--accent);font-size:12px;font-weight:700}.nav-drawer-title{font-size:13px;font-weight:600}.nav-drawer-sub{font-size:11px;color:var(--text-muted);margin-top:1px}
-  .nav-drawer-close{width:28px;height:28px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface-2);color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:background 0.1s}.nav-drawer-close:hover{background:var(--surface-3)}
-  .nav-drawer-body{flex:1;overflow-y:auto;padding:12px}.nav-pipeline-label{font-size:10px;font-weight:600;letter-spacing:0.09em;text-transform:uppercase;color:var(--text-muted);padding:8px 4px 6px}.nav-pipeline-label:not(:first-child){margin-top:8px}
-  .nav-agent-row{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius);text-decoration:none;color:var(--text-secondary);font-size:13px;transition:background 0.1s,color 0.1s;cursor:pointer;border:1px solid transparent}.nav-agent-row:hover:not(.nav-disabled){background:var(--surface-2);color:var(--text-primary)}.nav-agent-row.nav-active{background:var(--accent-bg);color:var(--accent);border-color:var(--accent-border)}.nav-agent-row.nav-disabled{opacity:0.4;cursor:default;pointer-events:none}
-  .nav-agent-icon{width:28px;height:28px;border-radius:6px;background:var(--surface-3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;color:var(--text-muted)}.nav-agent-row.nav-active .nav-agent-icon{background:var(--accent-bg);border-color:var(--accent-border);color:var(--accent)}
-  .nav-agent-info{flex:1;min-width:0}.nav-agent-name{font-weight:600;font-size:13px}.nav-agent-role{font-size:11px;color:var(--text-muted);margin-top:1px}
-  .nav-status-pip{width:7px;height:7px;border-radius:50%;flex-shrink:0}.pip-live{background:var(--success)}.pip-planned{background:var(--border-strong)}
-  .nav-drawer-foot{padding:12px;border-top:1px solid var(--border);flex-shrink:0}.nav-drawer-foot-link{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text-muted);text-decoration:none;padding:7px 8px;border-radius:var(--radius);transition:background 0.1s,color 0.1s}.nav-drawer-foot-link:hover{background:var(--surface-2);color:var(--text-secondary)}
+  .nav-drawer-logo{display:flex;align-items:center;gap:10px}
+  .nav-drawer-logo-mark{width:30px;height:30px;border-radius:7px;background:var(--brand);border:1px solid var(--accent-border);display:flex;align-items:center;justify-content:center}
+  .nav-drawer-logo-mark span{color:var(--accent);font-size:12px;font-weight:700}
+  .nav-drawer-title{font-size:13px;font-weight:600}
+  .nav-drawer-sub{font-size:11px;color:var(--text-muted);margin-top:1px}
+  .nav-drawer-close{width:28px;height:28px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface-2);color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:background 0.1s}
+  .nav-drawer-close:hover{background:var(--surface-3)}
+  .nav-drawer-body{flex:1;overflow-y:auto;padding:12px}
+  .nav-pipeline-label{font-size:10px;font-weight:600;letter-spacing:0.09em;text-transform:uppercase;color:var(--text-muted);padding:8px 4px 6px}
+  .nav-pipeline-label:not(:first-child){margin-top:8px}
+  .nav-agent-row{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius);text-decoration:none;color:var(--text-secondary);font-size:13px;transition:background 0.1s,color 0.1s;cursor:pointer;border:1px solid transparent}
+  .nav-agent-row:hover:not(.nav-disabled){background:var(--surface-2);color:var(--text-primary)}
+  .nav-agent-row.nav-active{background:var(--accent-bg);color:var(--accent);border-color:var(--accent-border)}
+  .nav-agent-row.nav-disabled{opacity:0.4;cursor:default;pointer-events:none}
+  .nav-agent-icon{width:28px;height:28px;border-radius:6px;background:var(--surface-3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;color:var(--text-muted)}
+  .nav-agent-row.nav-active .nav-agent-icon{background:var(--accent-bg);border-color:var(--accent-border);color:var(--accent)}
+  .nav-agent-info{flex:1;min-width:0}
+  .nav-agent-name{font-weight:600;font-size:13px}
+  .nav-agent-role{font-size:11px;color:var(--text-muted);margin-top:1px}
+  .nav-status-pip{width:7px;height:7px;border-radius:50%;flex-shrink:0}.pip-live{background:var(--success)}
+  .pip-planned{background:var(--border-strong)}
+  .nav-drawer-foot{padding:12px;border-top:1px solid var(--border);flex-shrink:0}
+  .nav-drawer-foot-link{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text-muted);text-decoration:none;padding:7px 8px;border-radius:var(--radius);transition:background 0.1s,color 0.1s}
+  .nav-drawer-foot-link:hover{background:var(--surface-2);color:var(--text-secondary)}
   .top-nav{position:fixed;top:0;left:0;right:0;height:42px;background:var(--surface-1);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:12px;z-index:800}
-  .top-nav-btn{width:30px;height:30px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface-2);color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}.top-nav-btn:hover{background:var(--surface-3)}
-  .top-nav-crumb{font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:6px}.top-nav-crumb a{color:var(--text-muted);text-decoration:none}.top-nav-crumb a:hover{color:var(--accent)}.top-nav-crumb .crumb-current{color:var(--text-primary);font-weight:600}
+  .top-nav-btn{width:30px;height:30px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface-2);color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+  .top-nav-btn:hover{background:var(--surface-3)}
+  .top-nav-crumb{font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:6px}
+  .top-nav-crumb a{color:var(--text-muted);text-decoration:none}
+  .top-nav-crumb a:hover{color:var(--accent)}
+  .top-nav-crumb .crumb-current{color:var(--text-primary);font-weight:600}
   .top-nav-agent-badge{margin-left:auto;font-size:11px;font-weight:600;padding:3px 10px;border-radius:12px;background:var(--accent-bg);color:var(--accent);border:1px solid var(--accent-border);letter-spacing:0.04em}
   body{
     padding-top:42px;
@@ -43,20 +65,32 @@
     min-height:100vh;
     display:grid;
     grid-template-columns:260px 1fr;
-    grid-template-rows:calc(300vh - 42px);
+    grid-template-rows:calc(400vh - 42px);
     overflow:scroll
   }
   .sidebar{background:var(--surface-1);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:scroll}
   .sidebar-head{padding:16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0}
-  .logo-mark{width:32px;height:32px;border-radius:8px;background:var(--brand);border:1px solid var(--accent-border);display:flex;align-items:center;justify-content:center;flex-shrink:0}.logo-mark span{color:var(--accent);font-size:13px;font-weight:700}.pub-name{font-size:13px;font-weight:600}.pub-sub{font-size:11px;color:var(--text-muted);margin-top:1px}
+  .logo-mark{width:32px;height:32px;border-radius:8px;background:var(--brand);border:1px solid var(--accent-border);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .logo-mark span{color:var(--accent);font-size:13px;font-weight:700}
+  .pub-name{font-size:13px;font-weight:600}
+  .pub-sub{font-size:11px;color:var(--text-muted);margin-top:1px}
   .agent-card{margin:12px;padding:12px;background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:var(--radius);flex-shrink:0}
   .agent-name{font-size:13px;font-weight:700;color:var(--accent);display:flex;align-items:center;gap:6px}.agent-role{font-size:11px;color:var(--text-secondary);margin-top:3px}
   .pipeline-badge{font-size:10px;font-weight:600;letter-spacing:0.07em;background:var(--surface-3);color:var(--text-muted);border:1px solid var(--border);border-radius:4px;padding:2px 6px;margin-top:8px;display:inline-block}
   .pipeline-label{font-size:10px;color:var(--text-muted);padding:14px 16px 6px;letter-spacing:0.08em;text-transform:uppercase;flex-shrink:0}
-  .pipeline-steps{padding:0 12px;flex-shrink:0}.step{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:var(--radius);font-size:12px;color:var(--text-muted)}.step.active{color:var(--accent);background:var(--accent-bg)}.step.done{color:var(--success)}.step-dot{width:8px;height:8px;border-radius:50%;background:var(--border-strong);flex-shrink:0}.step.active .step-dot{background:var(--accent)}.step.done .step-dot{background:var(--success)}}
-  .session-section{margin:0 12px 12px;padding:10px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);flex-shrink:0}.session-row{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--text-secondary);margin-bottom:4px}.session-row:last-child{margin-bottom:0}.session-val{color:var(--text-primary);font-weight:500}
-  .status-badge{font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px}.status-badge.idle{background:var(--surface-3);color:var(--text-muted)}.status-badge.running{background:var(--accent-bg);color:var(--accent)}.status-badge.done{background:var(--success-bg);color:var(--success)}.status-badge.error{background:var(--danger-bg);color:var(--danger)}
-  .sidebar-spacer{flex:1}.sidebar-footer{padding:12px;border-top:1px solid var(--border);flex-shrink:0}.footer-link{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted);text-decoration:none;padding:5px 6px;border-radius:var(--radius);transition:background 0.1s,color 0.1s}.footer-link:hover{background:var(--surface-2);color:var(--text-secondary)}
+  .pipeline-steps{padding:0 12px;flex-shrink:0}.step{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:var(--radius);font-size:12px;color:var(--text-muted)}
+  .step.active{color:var(--accent);background:var(--accent-bg)}.step.done{color:var(--success)}
+  .step-dot{width:8px;height:8px;border-radius:50%;background:var(--border-strong);flex-shrink:0}.step.active .step-dot{background:var(--accent)}
+  .step.done .step-dot{background:var(--success)}}
+  .session-section{margin:0 12px 12px;padding:10px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);flex-shrink:0}
+  .session-row{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--text-secondary);margin-bottom:4px}.session-row:last-child{margin-bottom:0}.session-val{color:var(--text-primary);font-weight:500}
+  .status-badge{font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px}.status-badge.idle{background:var(--surface-3);color:var(--text-muted)}
+  .status-badge.running{background:var(--accent-bg);color:var(--accent)}.status-badge.done{background:var(--success-bg);color:var(--success)}
+  .status-badge.error{background:var(--danger-bg);color:var(--danger)}
+  .sidebar-spacer{flex:1}
+  .sidebar-footer{padding:12px;border-top:1px solid var(--border);flex-shrink:0}
+  .footer-link{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted);text-decoration:none;padding:5px 6px;border-radius:var(--radius);transition:background 0.1s,color 0.1s}
+  .footer-link:hover{background:var(--surface-2);color:var(--text-secondary)}
   .main{display:flex;flex-direction:column;overflow:scroll}
   .topbar{padding:14px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
   .topbar-title{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px}
@@ -393,9 +427,6 @@ function runEthan() {
 
   try {
     // ── Build new Hero Main card ──────────────────────────────────────────────
-    const sevLabel = {CRITICAL:'Critical',HIGH:'High',MEDIUM:'Medium',LOW:'Low',INFO:'Informational'}[sevState.main]||'';
-    const sevClass = {CRITICAL:'sev-critical',HIGH:'sev-high',MEDIUM:'sev-medium',LOW:'sev-low',INFO:'sev-info'}[sevState.main]||'sev-info';
-
     const newHeroMain = `    <!-- ★ HERO MAIN ★ -->
     <a class="hero-card-main" href="${esc(val('main-url'))}">
       <img
@@ -472,34 +503,30 @@ function runEthan() {
     </a>`;
 
     // ── Extract current hero cards to cascade into news ───────────────────────
-    // Extract current Hero Main
     const heroMainMatch = intelHTML.match(/<!-- ★ HERO MAIN ★ -->([\s\S]*?)(?=<!-- ★ HERO SIDE TOP ★|$)/);
     const heroSideTopMatch = intelHTML.match(/<!-- ★ HERO SIDE TOP ★ -->([\s\S]*?)(?=<!-- ★ HERO SIDE BOTTOM ★|$)/);
-    const heroSideBottomMatch = intelHTML.match(/<!-- ★ HERO SIDE BOTTOM ★ -->([\s\S]*?)(?=<\/div><!-- \/hero-grid -->|$)/);
+    const heroSideBottomMatch = intelHTML.match(/<!-- ★ HERO SIDE BOTTOM ★ -->([\s\S]*?)(?=<\/div>\s*<!-- \/hero-grid -->|$)/);
 
     if(!heroMainMatch || !heroSideTopMatch || !heroSideBottomMatch) {
       throw new Error('Could not find Hero card markers in intel.html. Check that the file uses the expected comment structure.');
     }
 
-    // Convert hero cards to news cards
+    // Convert hero cards to news cards safely using class patterns
     function heroMainToNews(heroBlock) {
-      // Extract fields from hero-card-main block
       const href    = heroBlock.match(/href="([^"]+)"/)?.[1] || '#';
       const src     = heroBlock.match(/src="([^"]+)"/)?.[1] || '';
       const alt     = heroBlock.match(/alt="([^"]+)"/)?.[1] || '';
-      const date    = heroBlock.match(/cs-date align-right">([^<]+)<\/span>/)?.[1] || '';
-      const h2      = heroBlock.match(/<h2>([^<]+)<\/h2>/)?.[1] || '';
+      const date    = heroBlock.match(/cs-date[^>]*>([\s\S]*?)<\/span>/)?.[1] || '';
+      const h2      = heroBlock.match(/<h2>([\s\S]*?)<\/h2>/)?.[1] || '';
       const tags    = [...heroBlock.matchAll(/<span class="cs-tag">([^<]+)<\/span>/g)].map(m=>m[1]);
-      const paras   = [...heroBlock.matchAll(/<p>([^<]+)<\/p>/g)].map(m=>m[1]);
-      const excerpt = paras[0] || '';
-      const thumbSrc = src.replace('banners/','banners/').replace('.png','.png'); // same path works
+      const excerpt = heroBlock.match(/<p>[^<]*<\/p>/) ? heroBlock.match(/<p>([\s\S]*?)<\/p>/)?.[1] : '';
 
       return `        <!-- ROTATED FROM HERO MAIN -->
         <a class="news-card" href="${esc(href)}">
           <div class="news-left">
             <img
               class="news-thumb"
-              src="${esc(thumbSrc)}"
+              src="${esc(src)}"
               alt="${esc(alt)}"
               onerror="this.style.background='var(--cs-navy)'"
             >
@@ -520,11 +547,10 @@ function runEthan() {
       const href    = heroBlock.match(/href="([^"]+)"/)?.[1] || '#';
       const src     = heroBlock.match(/src="([^"]+)"/)?.[1] || '';
       const alt     = heroBlock.match(/alt="([^"]+)"/)?.[1] || '';
-      const date    = heroBlock.match(/cs-date align-right">([^<]+)<\/span>/)?.[1] || '';
-      const h3      = heroBlock.match(/<h3>([^<]+)<\/h3>/)?.[1] || '';
+      const date    = heroBlock.match(/cs-date[^>]*>([\s\S]*?)<\/span>/)?.[1] || '';
+      const h3      = heroBlock.match(/<h3>([\s\S]*?)<\/h3>/)?.[1] || '';
       const tags    = [...heroBlock.matchAll(/<span class="cs-tag">([^<]+)<\/span>/g)].map(m=>m[1]);
-      const paras   = [...heroBlock.matchAll(/<p>([^<]+)<\/p>/g)].map(m=>m[1]);
-      const excerpt = paras[0] || '';
+      const excerpt = heroBlock.match(/<p>([\s\S]*?)<\/p>/)?.[1] || '';
 
       return `        <!-- ROTATED FROM ${label} -->
         <a class="news-card" href="${esc(href)}">
@@ -551,6 +577,9 @@ function runEthan() {
     const rotatedMain    = heroMainToNews(heroMainMatch[1]);
     const rotatedSideTop = heroSideToNews(heroSideTopMatch[1], 'HERO SIDE TOP');
     const rotatedSideBot = heroSideToNews(heroSideBottomMatch[1], 'HERO SIDE BOTTOM');
+
+    // Combine all rotated cards into a single block to prepend to news list
+    const consolidatedRotatedCards = `${rotatedMain}\n\n${rotatedSideTop}\n\n${rotatedSideBot}`;
 
     // ── Build new DIG cards ───────────────────────────────────────────────────
     const newDig1 = `        <!-- NEW DIG CARD -->
@@ -602,28 +631,27 @@ function runEthan() {
 
     // 3. Replace Hero Side Bottom
     updated = updated.replace(
-      /<!-- ★ HERO SIDE BOTTOM ★ -->[\s\S]*?(?=\s*<\/div><!-- \/hero-grid -->)/,
+      /<!-- ★ HERO SIDE BOTTOM ★ -->[\s\S]*?(?=\s*<\/div>\s*<!-- \/hero-grid -->)/,
       newHeroSideBottom + '\n\n  '
     );
 
-    // 4. Replace existing rotated cards with new rotated cards
+    // 4. Prepend the rotated cards right under the <div class="news-list"> opening tag.
+    // This pushes down old articles without deleting any layout structures.
+    if (!updated.includes('<div class="news-list">')) {
+      throw new Error('Could not find the target entry container <div class="news-list"> in target file.');
+    }
     updated = updated.replace(
-      /<!-- ROTATED FROM HERO MAIN -->[\s\S]*?(?=<!-- ROTATED FROM HERO SIDE TOP -->)/,
-      rotatedMain + '\n\n        '
-    );
-    updated = updated.replace(
-      /<!-- ROTATED FROM HERO SIDE TOP -->[\s\S]*?(?=<!-- ROTATED FROM HERO SIDE BOTTOM -->)/,
-      rotatedSideTop + '\n\n        '
-    );
-    updated = updated.replace(
-      /<!-- ROTATED FROM HERO SIDE BOTTOM -->[\s\S]*?(?=<!-- EXISTING NEWS CARD -->)/,
-      rotatedSideBot + '\n\n        '
+      '<div class="news-list">',
+      '<div class="news-list">\n\n' + consolidatedRotatedCards
     );
 
-    // 5. Prepend new DIG cards before ADD MORE DIG CARDS marker
+    // 5. Prepend new DIG cards at the TOP of dig-list without layout breaks
+    if (!updated.includes('<div class="dig-list">')) {
+      throw new Error('Could not find the target entry container <div class="dig-list"> in target file.');
+    }
     updated = updated.replace(
-      '<!-- ADD MORE DIG CARDS ABOVE THIS LINE -->',
-      newDig1 + '\n\n' + newDig2 + '\n\n        <!-- ADD MORE DIG CARDS ABOVE THIS LINE -->'
+      '<div class="dig-list">',
+      '<div class="dig-list">\n\n' + newDig1 + '\n\n' + newDig2
     );
 
     outputHTML = updated;

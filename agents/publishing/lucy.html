@@ -270,26 +270,27 @@ function runLucy() {
 
     const featuredBlock = featuredMatch[1];
 
-    // Extract current featured fields
-    const curEditionBadge = featuredBlock.match(/nl-edition-badge">([^<]+)<\/span>/)?.[1] || '';
-    const curDate         = featuredBlock.match(/nl-feat-date">([^<]+)<\/span>/)?.[1] || '';
-    const curTheme        = featuredBlock.match(/nl-feat-theme">([^<]+)<\/h2>/)?.[1] || '';
-    const curSummary      = featuredBlock.match(/nl-feat-summary">\s*([\s\S]*?)\s*<\/p>/)?.[1]?.trim().replace(/[\r\n\s]+/g,' ') || '';
-    const curUrl          = featuredBlock.match(/nl-read-more" href="([^"]+)"/)?.[1] || '#';
+    // Extract current featured fields using resilient class-based boundary selectors
+    const curEditionBadge = featuredBlock.match(/nl-edition-badge"[^>]*>([\s\S]*?)<\/span>/)?.[1] || '';
+    const curDate         = featuredBlock.match(/nl-feat-date"[^>]*>([\s\S]*?)<\/span>/)?.[1] || '';
+    const curTheme        = featuredBlock.match(/nl-feat-theme"[^>]*>([\s\S]*?)<\/h2>/)?.[1] || '';
+    const curSummary      = featuredBlock.match(/nl-feat-summary"[^>]*>([\s\S]*?)<\/p>/)?.[1]?.trim().replace(/[\r\n\s]+/g,' ') || '';
+    const curUrl          = featuredBlock.match(/href="([^"]+)"/)?.[1] || '#';
 
     // ── Extract current Previous Editions cards ───────────────────────────────
     const prevSection = newsletterHTML.match(/<!-- ══ RIGHT: PREVIOUS EDITIONS ══ -->([\s\S]*?)(?=<\/div><!-- \/nl-main -->)/);
     if(!prevSection) throw new Error('Could not find Previous Editions section.');
 
-    const prevCards = [...prevSection[1].matchAll(/<a class="nl-prev-card" href="([^"]+)">([\s\S]*?)<\/a>/g)];
+    const prevCards = [...prevSection[1].matchAll(/<a\s+[^>]*class="[^"]*nl-prev-card[^"]*"[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g)];
     if(prevCards.length < 1) throw new Error('Could not find any Previous Edition cards.');
 
-    // Parse each prev card
+    // Parse each prev card safely allowing tags, whitespace variations, and clean text strings
     function parsePrevCard(href, body) {
-      const title   = body.match(/nl-prev-title">([^<]+)<\/span>/)?.[1] || '';
-      const badge   = body.match(/nl-prev-edition-badge">([^<]+)<\/span>/)?.[1] || '';
-      const summary = body.match(/nl-prev-summary">([\s\S]*?)<\/p>/)?.[1]?.trim().replace(/\s+/g,' ') || '';
-      const pubDate = body.match(/nl-prev-date">([^<]+)<\/span>/)?.[1] || '';
+      const title   = body.match(/nl-prev-title"[^>]*>([\s\S]*?)<\/span>/)?.[1] || '';
+      const badge   = body.match(/nl-prev-edition-badge"[^>]*>([\s\S]*?)<\/span>/)?.[1] || '';
+      const summary = body.match(/nl-prev-summary"[^>]*>([\s\S]*?)<\/p>/)?.[1]?.trim().replace(/\s+/g,' ') || '';
+      // Strip out any redundant 'Published ' strings to keep historical loops clean
+      const pubDate = body.match(/nl-prev-date"[^>]*>([\s\S]*?)<\/span>/)?.[1]?.replace(/Published\s+/i, '') || '';
       return { href, title, badge, summary, pubDate };
     }
 
@@ -348,7 +349,7 @@ function runLucy() {
         <p class="nl-prev-summary">${esc(c.summary)}</p>
         <div class="nl-prev-footer">
           <span class="nl-prev-read">Read more →</span>
-          <span class="nl-prev-date">${esc(c.pubDate)}</span>
+          <span class="nl-prev-date">Published ${esc(c.pubDate)}</span>
         </div>
       </a>`).join('\n\n');
 
@@ -367,7 +368,7 @@ ${remainingPrevHTML}
 </div><!-- /nl-main -->`;
 
     // ── Build archive entry for oldest prev card ───────────────────────────────
-    const oldDate  = oldestPrev.pubDate.replace('Published ','').trim() || '';
+    const oldDate  = oldestPrev.pubDate.trim() || '';
     const oldTitle = oldestPrev.title;
     const oldBadge = oldestPrev.badge;
     const oldHref  = oldestPrev.href;
