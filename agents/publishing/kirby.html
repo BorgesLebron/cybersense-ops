@@ -247,51 +247,56 @@
 
 <script>
 // ── Extraction prompt ─────────────────────────────────────────────────────────
-const EXTRACT_PROMPT = `You are a content extraction agent for CyberSense.Solutions Daily Digital Awareness Brief. Extract all content fields from the provided newsletter and return them using XML-style section tags exactly as shown. Do NOT use JSON. Do NOT use markdown. Output only the tagged content.
+const EXTRACT_PROMPT = `You are a content extraction agent. You will be given a CyberSense Daily Digital Awareness Brief newsletter. Your job is to extract specific fields and return them wrapped in XML tags.
+
+CRITICAL INSTRUCTIONS:
+1. Return ONLY the XML-tagged output — nothing else before or after
+2. Replace the placeholder text inside each tag with the actual content from the newsletter
+3. Do NOT include any preamble, explanation, or text outside the tags
+4. Keep each tag on its own line
+5. Do not skip any tags — if a field is missing, leave the tag empty
 
 <EDITION_TITLE>the thematic title of this edition</EDITION_TITLE>
-<OPEN_P1>first opening paragraph text</OPEN_P1>
-<OPEN_P2>second opening paragraph text</OPEN_P2>
-<SA_HEAD1>short display headline for SA entry 1</SA_HEAD1>
+<OPEN_P1>first opening paragraph verbatim</OPEN_P1>
+<OPEN_P2>second opening paragraph verbatim</OPEN_P2>
+<SA_HEAD1>3-5 word headline for Situational Awareness entry 1</SA_HEAD1>
 <SA_FULL1>full article title for SA entry 1</SA_FULL1>
-<SA_BODY1>full paragraph body text for SA entry 1</SA_BODY1>
-<SA_HEAD2>short display headline for SA entry 2</SA_HEAD2>
+<SA_BODY1>full body paragraph for SA entry 1</SA_BODY1>
+<SA_HEAD2>3-5 word headline for SA entry 2</SA_HEAD2>
 <SA_FULL2>full article title for SA entry 2</SA_FULL2>
-<SA_BODY2>full paragraph body text for SA entry 2</SA_BODY2>
-<SA_HEAD3>short display headline for SA entry 3</SA_HEAD3>
+<SA_BODY2>full body paragraph for SA entry 2</SA_BODY2>
+<SA_HEAD3>3-5 word headline for SA entry 3</SA_HEAD3>
 <SA_FULL3>full article title for SA entry 3</SA_FULL3>
-<SA_BODY3>full paragraph body text for SA entry 3</SA_BODY3>
+<SA_BODY3>full body paragraph for SA entry 3</SA_BODY3>
 <TB_TOPIC>Training Byte topic line</TB_TOPIC>
 <TB_KNOW>What You Need to Know paragraph</TB_KNOW>
-<TB_ACT_ROLE1>Individual</TB_ACT_ROLE1>
-<TB_ACT_LABEL1>short label for individual action</TB_ACT_LABEL1>
-<TB_ACT_TEXT1>full individual action text</TB_ACT_TEXT1>
-<TB_ACT_ROLE2>Team Lead</TB_ACT_ROLE2>
-<TB_ACT_LABEL2>short label for team lead action</TB_ACT_LABEL2>
-<TB_ACT_TEXT2>full team lead action text</TB_ACT_TEXT2>
-<TB_ACT_ROLE3>Security Team</TB_ACT_ROLE3>
-<TB_ACT_LABEL3>short label for security team action</TB_ACT_LABEL3>
-<TB_ACT_TEXT3>full security team action text</TB_ACT_TEXT3>
+<TB_ACT_ROLE1>role for defensive action 1</TB_ACT_ROLE1>
+<TB_ACT_LABEL1>short label for defensive action 1</TB_ACT_LABEL1>
+<TB_ACT_TEXT1>full text of defensive action 1</TB_ACT_TEXT1>
+<TB_ACT_ROLE2>role for defensive action 2</TB_ACT_ROLE2>
+<TB_ACT_LABEL2>short label for defensive action 2</TB_ACT_LABEL2>
+<TB_ACT_TEXT2>full text of defensive action 2</TB_ACT_TEXT2>
+<TB_ACT_ROLE3>role for defensive action 3</TB_ACT_ROLE3>
+<TB_ACT_LABEL3>short label for defensive action 3</TB_ACT_LABEL3>
+<TB_ACT_TEXT3>full text of defensive action 3</TB_ACT_TEXT3>
 <TB_WHY>Why This Matters paragraph</TB_WHY>
-<TB_QUOTE>verbatim closing quote text only</TB_QUOTE>
+<TB_QUOTE>closing quote text only, no quotation marks</TB_QUOTE>
 <TB_ATTRIBUTION>quote attribution</TB_ATTRIBUTION>
-<TB_SOURCE>quote source descriptor</TB_SOURCE>
-<TB_YEAR>quote year</TB_YEAR>
+<TB_SOURCE>source name or publication</TB_SOURCE>
+<TB_YEAR>year of quote</TB_YEAR>
 <PG_TITLE>Professional Growth resource title</PG_TITLE>
-<PG_ORG>organization name</PG_ORG>
+<PG_ORG>organization offering it</PG_ORG>
 <PG_FORMAT>format and cost descriptor</PG_FORMAT>
-<PG_BODY>relevance justification paragraph</PG_BODY>
-<DIG_HEAD1>short display headline for DIG entry 1</DIG_HEAD1>
-<DIG_BODY1>full paragraph body text for DIG entry 1</DIG_BODY1>
-<DIG_HEAD2>short display headline for DIG entry 2</DIG_HEAD2>
-<DIG_BODY2>full paragraph body text for DIG entry 2</DIG_BODY2>
+<PG_BODY>relevance paragraph</PG_BODY>
+<DIG_HEAD1>3-5 word headline for DIG entry 1</DIG_HEAD1>
+<DIG_BODY1>full body paragraph for DIG entry 1</DIG_BODY1>
+<DIG_HEAD2>3-5 word headline for DIG entry 2</DIG_HEAD2>
+<DIG_BODY2>full body paragraph for DIG entry 2</DIG_BODY2>
 <FT_TITLE>Final Thought section title</FT_TITLE>
 <FT_P1>Final Thought paragraph 1</FT_P1>
 <FT_P2>Final Thought paragraph 2</FT_P2>
-<FT_P3>Final Thought paragraph 3 (if present)</FT_P3>
-<FT_CLOSE>single memorable closing line</FT_CLOSE>
-
-Output only the tagged lines above. No preamble, no explanation, no other text.\``;
+<FT_P3>Final Thought paragraph 3 if present, else leave empty</FT_P3>
+<FT_CLOSE>single memorable closing line</FT_CLOSE>`
 
 // ── State ─────────────────────────────────────────────────────────────────────
 let generatedHTML = '';
@@ -345,7 +350,9 @@ function updateFilename() {
 function parseTagged(raw) {
   function get(tag) {
     const m = raw.match(new RegExp(`<${tag}>([\s\S]*?)<\/${tag}>`));
-    return m ? m[1].trim() : '';
+    if (!m) return '';
+    // Strip any accidental "REPLACE WITH:" prefix if model echoed the instruction
+    return m[1].trim().replace(/^REPLACE WITH:\s*/i, '');
   }
 
   const ftParas = [get('FT_P1'), get('FT_P2'), get('FT_P3')].filter(Boolean);
