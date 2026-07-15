@@ -64,7 +64,7 @@
   .output-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
   .output-label{font-size:12px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.07em;display:flex;align-items:center;gap:6px}
   .output-actions{display:flex;gap:8px}
-  .btn-action{font-size:11px;font-weight:600;padding:5px 10px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface-2);color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;gap:5px;transition:background 0.1s}.btn-action:hover{background:var(--surface-3)}..btn-action.primary{background:var(--accent-bg);border-color:var(--accent-border);color:var(--accent)}.btn-action.primary:hover{background:rgba(201,163,232,0.14)}
+  .btn-action{font-size:11px;font-weight:600;padding:5px 10px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface-2);color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;gap:5px;transition:background 0.1s}.btn-action:hover{background:var(--surface-3)}.btn-action.primary{background:var(--accent-bg);border-color:var(--accent-border);color:var(--accent)}.btn-action.primary:hover{background:rgba(201,163,232,0.14)}
   .output-filename{padding:8px 16px;background:var(--surface-2);border-bottom:1px solid var(--border);font-size:11px;font-family:var(--font-mono);color:var(--text-muted);display:flex;align-items:center;gap:6px}
   .output-body{padding:16px;max-height:400px;overflow-y:auto}
   .output-text{font-family:var(--font-mono);font-size:11px;line-height:1.6;color:var(--text-secondary);white-space:pre-wrap;word-break:break-word}
@@ -263,61 +263,33 @@ function runLucy() {
   document.getElementById('output-card').classList.remove('visible');
   document.getElementById('error-box').classList.remove('visible');
 
-  try {
-    // ── Extract current Featured block ────────────────────────────────────────
-    // UPGRADED: Flexible Regex fallback patterns that account for structural spacing drift and alternative uppercase syntax markers
-    let mainStartMarker = '<!-- ══ LEFT: LATEST EDITION ══ -->';
-    let mainEndMarker = '<!-- ══ RIGHT: PREVIOUS EDITIONS ══ -->';
-    
-    let featuredMatch = newsletterHTML.match(/<!--\s*══\s*LEFT:\s*LATEST\s*EDITION\s*══\s*-->([\s\S]*?)(?=<!--\s*══\s*RIGHT:\s*PREVIOUS\s*EDITIONS\s*══\s*-->)/i);
-    
-    if(!featuredMatch) {
-      // Fallback matching to resilient comment tokens if specific emoji characters fail parsing
-      featuredMatch = newsletterHTML.match(/<!--\s*.*?LEFT:\s*LATEST\s*EDITION.*-->([\s\S]*?)(?=<!--\s*.*RIGHT:\s*PREVIOUS\s*EDITIONS.*-->)/i);
-      if (featuredMatch) {
-        // Dynamically normalize target markers to ensure clean index cutting
-        const rawMarkers = newsletterHTML.match(/(<!--\s*.*?LEFT:\s*LATEST\s*EDITION.*-->)[\s\S]*?(<!--\s*.*RIGHT:\s*PREVIOUS\s*EDITIONS.*-->)/i);
-        if (rawMarkers) {
-          mainStartMarker = rawMarkers[1];
-          mainEndMarker = rawMarkers[2];
-        }
-      }
-    }
-
-    if(!featuredMatch) throw new Error('Could not find Featured Edition block. Check newsletter.html structure.');
+try {
+    // ── Resilient Extraction of Featured Block (Class-Based) ─────────────────
+    const featuredMatch = newsletterHTML.match(/<div\s+[^>]*class="[^"]*nl-featured[^"]*"[^>]*>([\s\S]*?)<\/div>\s*<\/div>\s*<\/div>/i);
+    if(!featuredMatch) throw new Error('Could not find Featured Edition block container (<div class="nl-featured">).');
 
     const featuredBlock = featuredMatch[1];
 
-    // Extract current featured fields using resilient class-based boundary selectors
-    const curEditionBadge = featuredBlock.match(/nl-edition-badge"[^>]*>([\s\S]*?)<\/span>/)?.[1] || '';
-    const curDate         = featuredBlock.match(/nl-feat-date"[^>]*>([\s\S]*?)<\/span>/)?.[1] || '';
-    const curTheme        = featuredBlock.match(/nl-feat-theme"[^>]*>([\s\S]*?)<\/h2>/)?.[1] || '';
-    const curSummary      = featuredBlock.match(/nl-feat-summary"[^>]*>([\s\S]*?)<\/p>/)?.[1]?.trim().replace(/[\r\n\s]+/g,' ') || '';
-    const curUrl          = featuredBlock.match(/href="([^"]+)"/)?.[1] || '#';
+    // Extract current featured fields safely using flexible attribute selectors
+    const curEditionBadge = featuredBlock.match(/class="nl-edition-badge"[^>]*>([\s\S]*?)<\/span>/i)?.[1] || '';
+    const curDate         = featuredBlock.match(/class="nl-feat-date"[^>]*>([\s\S]*?)<\/span>/i)?.[1] || '';
+    const curTheme        = featuredBlock.match(/class="nl-feat-theme"[^>]*>([\s\S]*?)<\/h2>/i)?.[1] || '';
+    const curSummary      = featuredBlock.match(/class="nl-feat-summary"[^>]*>([\s\S]*?)<\/p>/i)?.[1]?.trim().replace(/[\r\n\s]+/g,' ') || '';
+    const curUrl          = featuredBlock.match(/href="([^"]+)"/i)?.[1] || '#';
 
-    // ── Extract current Previous Editions cards ───────────────────────────────
-    let prevEndMarker = '</div><!-- /nl-main -->';
-    let prevSection = newsletterHTML.match(/<!--\s*══\s*RIGHT:\s*PREVIOUS\s*EDITIONS\s*══\s*-->([\s\S]*?)(?=<\/div>\s*<!--\s*\/nl-main\s*-->)/i);
-    
-    if(!prevSection) {
-      prevSection = newsletterHTML.match(/<!--\s*.*RIGHT:\s*PREVIOUS\s*EDITIONS.*-->([\s\S]*?)(?=<\/div>\s*<!--\s*\/nl-main\s*-->)/i);
-      if (prevSection) {
-        const rawEndMarker = newsletterHTML.match(/(<\/div>\s*<!--\s*\/nl-main\s*-->)/i);
-        if (rawEndMarker) prevEndMarker = rawEndMarker[1];
-      }
-    }
-    
-    if(!prevSection) throw new Error('Could not find Previous Editions section.');
+    // ── Resilient Extraction of Previous Column Block ─────────────────────────
+    const prevSection = newsletterHTML.match(/<div\s+[^>]*class="[^"]*nl-prev-list[^"]*"[^>]*>([\s\S]*?)<\/div>\s*<\/div>\s*<\/div>/i);
+    if(!prevSection) throw new Error('Could not find Previous Editions container list (<div class="nl-prev-list">).');
 
-    const prevCards = [...prevSection[1].matchAll(/<a\s+[^>]*class="[^"]*nl-prev-card[^"]*"[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g)];
-    if(prevCards.length < 1) throw new Error('Could not find any Previous Edition cards.');
+    const prevCards = [...prevSection[1].matchAll(/<a\s+[^>]*class="[^"]*nl-prev-card[^"]*"[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi)];
+    if(prevCards.length < 1) throw new Error('Could not find any historical Previous Edition cards.');
 
-    // Parse each prev card safely allowing tags, whitespace variations, and clean text strings
+    // Parse loop metrics for older entries safely
     function parsePrevCard(href, body) {
-      const title   = body.match(/nl-prev-title"[^>]*>([\s\S]*?)<\/span>/)?.[1] || '';
-      const badge   = body.match(/nl-prev-edition-badge"[^>]*>([\s\S]*?)<\/span>/)?.[1] || '';
-      const summary = body.match(/nl-prev-summary"[^>]*>([\s\S]*?)<\/p>/)?.[1]?.trim().replace(/\s+/g,' ') || '';
-      const pubDate = body.match(/nl-prev-date"[^>]*>([\s\S]*?)<\/span>/)?.[1]?.replace(/Published\s+/i, '') || '';
+      const title   = body.match(/class="nl-prev-title"[^>]*>([\s\S]*?)<\/span>/i)?.[1] || '';
+      const badge   = body.match(/class="nl-prev-edition-badge"[^>]*>([\s\S]*?)<\/span>/i)?.[1] || '';
+      const summary = body.match(/class="nl-prev-summary"[^>]*>([\s\S]*?)<\/p>/i)?.[1]?.trim().replace(/\s+/g,' ') || '';
+      const pubDate = body.match(/class="nl-prev-date"[^>]*>([\s\S]*?)<\/span>/i)?.[1]?.replace(/Published\s+/i, '') || '';
       return { href, title, badge, summary, pubDate };
     }
 
@@ -325,36 +297,29 @@ function runLucy() {
     const oldestPrev = currentPrevCards[currentPrevCards.length - 1];
     const remainingPrev = currentPrevCards.slice(0, -1);
 
-    // ── Build new Featured block ──────────────────────────────────────────────
-    const newFeatured = `  ${mainStartMarker}
-  <div class="nl-featured">
-    <div class="nl-feat-top-center">
-      <span class="nl-feat-briefing-label">Daily Digital Awareness Brief</span>
-    </div> 
-    <div class="nl-feat-top">
-      <img class="nl-feat-logo"
-           src="https://cybersense.solutions/assets/csicon.png"
-           alt="CyberSense logo"> 
-      <div class="nl-feat-top-right">
-        <span class="nl-feat-kicker">Latest Edition</span>
-        <span class="nl-feat-date">${esc(val('new-edition-date'))}</span>
-        <span class="nl-edition-badge">Edition ${esc(val('new-edition-num'))}</span>
+    // ── Build Re-Stitched Layout Strings ──────────────────────────────────────
+    const newFeaturedHTML = `
+    <div class="nl-featured">
+      <div class="nl-feat-top-center">
+        <span class="nl-feat-briefing-label">Daily Digital Awareness Brief</span>
+      </div> 
+      <div class="nl-feat-top">
+        <img class="nl-feat-logo" src="https://cybersense.solutions/assets/csicon.png" alt="CyberSense logo"> 
+        <div class="nl-feat-top-right">
+          <span class="nl-feat-kicker">Latest Edition</span>
+          <span class="nl-feat-date">${esc(val('new-edition-date'))}</span>
+          <span class="nl-edition-badge">Edition ${esc(val('new-edition-num'))}</span>
+        </div>
       </div>
-    </div>
-    <div class="nl-feat-divider"></div>
-    <h2 class="nl-feat-theme">${esc(val('new-edition-theme'))}</h2>
-    <div class="nl-feat-divider"></div>
-    <p class="nl-feat-summary">
-      ${esc(val('new-edition-summary'))}
-    </p>
-    <div class="nl-feat-actions">
-      <a class="nl-read-more" href="${esc(val('new-edition-url'))}">Read more →</a>
-    </div>
-  </div>
+      <div class="nl-feat-divider"></div>
+      <h2 class="nl-feat-theme">${esc(val('new-edition-theme'))}</h2>
+      <div class="nl-feat-divider"></div>
+      <p class="nl-feat-summary">${esc(val('new-edition-summary'))}</p>
+      <div class="nl-feat-actions">
+        <a class="nl-read-more" href="${esc(val('new-edition-url'))}">Read more →</a>
+      </div>
+    </div>`;
 
-  `;
-
-    // ── Build new Previous Editions — current featured + remaining prev cards ─
     const newFirstPrev = `      <a class="nl-prev-card" href="${esc(curUrl)}">
         <div class="nl-prev-card-top">
           <span class="nl-prev-title">${esc(curTheme)}</span>
@@ -379,42 +344,26 @@ function runLucy() {
         </div>
       </a>`).join('\n\n');
 
-    const newPrevSection = `${mainEndMarker}
-  <div class="nl-prev-col">
-    <p class="nl-prev-header">Previous Editions</p>
-    <div class="nl-prev-list">
+    // ── Perform Clean DOM Segment Swaps ───────────────────────────────────────
+    let updated = newsletterHTML;
 
-${newFirstPrev}
+    // Directly isolate and swap old layout containers using safe structural target boundaries
+    updated = updated.replace(/<div\s+[^>]*class="[^"]*nl-featured[^"]*"[^>]*>[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/i, newFeaturedHTML + '\n  </div>');
+    updated = updated.replace(/<div\s+[^>]*class="[^"]*nl-prev-list[^"]*"[^>]*>[\s\S]*?<\/div>/i, `<div class="nl-prev-list">\n\n${newFirstPrev}\n\n${remainingPrevHTML}\n\n    </div>`);
 
-${remainingPrevHTML}
-
-    </div>
-  </div>
-
-${prevEndMarker}`;
-
-    // ── Build archive entry for oldest prev card ───────────────────────────────
+    // ── Build Archive Array Append ────────────────────────────────────────────
     const oldDate  = oldestPrev.pubDate.trim() || '';
     const oldTitle = oldestPrev.title;
     const oldBadge = oldestPrev.badge;
     const oldHref  = oldestPrev.href;
     const oldDOW   = val('archive-dow');
 
-    const _months = {January:'01',February:'02',March:'03',April:'04',May:'05',June:'06',
-                     July:'07',August:'08',September:'09',October:'10',November:'11',December:'12'};
+    const _months = {January:'01',February:'02',March:'03',April:'04',May:'05',June:'06',July:'07',August:'08',September:'09',October:'10',November:'11',December:'12'};
     const _dp = oldDate.match(/^(\w+)\s+\d+,\s+(\d{4})$/);
     const monthKey   = _dp ? `${_dp[2]}-${_months[_dp[1]] || '07'}` : '2026-07';
     const monthLabel = _dp ? `${_dp[1]} ${_dp[2]}` : 'July 2026';
 
     const archiveEntry = `    { date:"${esc(oldDate)}", dow:"${esc(oldDOW)}", edition:"${esc(oldBadge)}", title:"${esc(oldTitle)}", href:"${esc(oldHref)}" },`;
-
-    // ── Perform replacements ──────────────────────────────────────────────────
-    let updated = newsletterHTML;
-
-    const nlMainStart = updated.indexOf(mainStartMarker);
-    const nlMainEnd   = updated.indexOf(prevEndMarker) + prevEndMarker.length;
-    if (nlMainStart < 0 || nlMainEnd < 0) throw new Error('Could not find nl-main boundaries.');
-    updated = updated.substring(0, nlMainStart) + newFeatured + newPrevSection + updated.substring(nlMainEnd);
 
     const monthMarker = `"${monthKey}": {`;
     const mIdx = updated.indexOf(monthMarker);
