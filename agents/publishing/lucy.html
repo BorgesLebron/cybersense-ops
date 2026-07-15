@@ -64,7 +64,7 @@
   .output-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
   .output-label{font-size:12px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.07em;display:flex;align-items:center;gap:6px}
   .output-actions{display:flex;gap:8px}
-  .btn-action{font-size:11px;font-weight:600;padding:5px 10px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface-2);color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;gap:5px;transition:background 0.1s}.btn-action:hover{background:var(--surface-3)}.btn-action.primary{background:var(--accent-bg);border-color:var(--accent-border);color:var(--accent)}.btn-action.primary:hover{background:rgba(201,163,232,0.14)}
+  .btn-action{font-size:11px;font-weight:600;padding:5px 10px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface-2);color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;gap:5px;transition:background 0.1s}.btn-action:hover{background:var(--surface-3)}..btn-action.primary{background:var(--accent-bg);border-color:var(--accent-border);color:var(--accent)}.btn-action.primary:hover{background:rgba(201,163,232,0.14)}
   .output-filename{padding:8px 16px;background:var(--surface-2);border-bottom:1px solid var(--border);font-size:11px;font-family:var(--font-mono);color:var(--text-muted);display:flex;align-items:center;gap:6px}
   .output-body{padding:16px;max-height:400px;overflow-y:auto}
   .output-text{font-family:var(--font-mono);font-size:11px;line-height:1.6;color:var(--text-secondary);white-space:pre-wrap;word-break:break-word}
@@ -265,7 +265,25 @@ function runLucy() {
 
   try {
     // ── Extract current Featured block ────────────────────────────────────────
-    const featuredMatch = newsletterHTML.match(/<!-- ══ LEFT: LATEST EDITION ══ -->([\s\S]*?)(?=<!-- ══ RIGHT: PREVIOUS EDITIONS ══ -->)/);
+    // UPGRADED: Flexible Regex fallback patterns that account for structural spacing drift and alternative uppercase syntax markers
+    let mainStartMarker = '<!-- ══ LEFT: LATEST EDITION ══ -->';
+    let mainEndMarker = '<!-- ══ RIGHT: PREVIOUS EDITIONS ══ -->';
+    
+    let featuredMatch = newsletterHTML.match(/<!--\s*══\s*LEFT:\s*LATEST\s*EDITION\s*══\s*-->([\s\S]*?)(?=<!--\s*══\s*RIGHT:\s*PREVIOUS\s*EDITIONS\s*══\s*-->)/i);
+    
+    if(!featuredMatch) {
+      // Fallback matching to resilient comment tokens if specific emoji characters fail parsing
+      featuredMatch = newsletterHTML.match(/<!--\s*.*?LEFT:\s*LATEST\s*EDITION.*-->([\s\S]*?)(?=<!--\s*.*RIGHT:\s*PREVIOUS\s*EDITIONS.*-->)/i);
+      if (featuredMatch) {
+        // Dynamically normalize target markers to ensure clean index cutting
+        const rawMarkers = newsletterHTML.match(/(<!--\s*.*?LEFT:\s*LATEST\s*EDITION.*-->)[\s\S]*?(<!--\s*.*RIGHT:\s*PREVIOUS\s*EDITIONS.*-->)/i);
+        if (rawMarkers) {
+          mainStartMarker = rawMarkers[1];
+          mainEndMarker = rawMarkers[2];
+        }
+      }
+    }
+
     if(!featuredMatch) throw new Error('Could not find Featured Edition block. Check newsletter.html structure.');
 
     const featuredBlock = featuredMatch[1];
@@ -278,7 +296,17 @@ function runLucy() {
     const curUrl          = featuredBlock.match(/href="([^"]+)"/)?.[1] || '#';
 
     // ── Extract current Previous Editions cards ───────────────────────────────
-    const prevSection = newsletterHTML.match(/<!-- ══ RIGHT: PREVIOUS EDITIONS ══ -->([\s\S]*?)(?=<\/div><!-- \/nl-main -->)/);
+    let prevEndMarker = '</div><!-- /nl-main -->';
+    let prevSection = newsletterHTML.match(/<!--\s*══\s*RIGHT:\s*PREVIOUS\s*EDITIONS\s*══\s*-->([\s\S]*?)(?=<\/div>\s*<!--\s*\/nl-main\s*-->)/i);
+    
+    if(!prevSection) {
+      prevSection = newsletterHTML.match(/<!--\s*.*RIGHT:\s*PREVIOUS\s*EDITIONS.*-->([\s\S]*?)(?=<\/div>\s*<!--\s*\/nl-main\s*-->)/i);
+      if (prevSection) {
+        const rawEndMarker = newsletterHTML.match(/(<\/div>\s*<!--\s*\/nl-main\s*-->)/i);
+        if (rawEndMarker) prevEndMarker = rawEndMarker[1];
+      }
+    }
+    
     if(!prevSection) throw new Error('Could not find Previous Editions section.');
 
     const prevCards = [...prevSection[1].matchAll(/<a\s+[^>]*class="[^"]*nl-prev-card[^"]*"[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g)];
@@ -289,7 +317,6 @@ function runLucy() {
       const title   = body.match(/nl-prev-title"[^>]*>([\s\S]*?)<\/span>/)?.[1] || '';
       const badge   = body.match(/nl-prev-edition-badge"[^>]*>([\s\S]*?)<\/span>/)?.[1] || '';
       const summary = body.match(/nl-prev-summary"[^>]*>([\s\S]*?)<\/p>/)?.[1]?.trim().replace(/\s+/g,' ') || '';
-      // Strip out any redundant 'Published ' strings to keep historical loops clean
       const pubDate = body.match(/nl-prev-date"[^>]*>([\s\S]*?)<\/span>/)?.[1]?.replace(/Published\s+/i, '') || '';
       return { href, title, badge, summary, pubDate };
     }
@@ -299,7 +326,7 @@ function runLucy() {
     const remainingPrev = currentPrevCards.slice(0, -1);
 
     // ── Build new Featured block ──────────────────────────────────────────────
-    const newFeatured = `  <!-- ══ LEFT: LATEST EDITION ══ -->
+    const newFeatured = `  ${mainStartMarker}
   <div class="nl-featured">
     <div class="nl-feat-top-center">
       <span class="nl-feat-briefing-label">Daily Digital Awareness Brief</span>
@@ -328,7 +355,6 @@ function runLucy() {
   `;
 
     // ── Build new Previous Editions — current featured + remaining prev cards ─
-    // Current featured becomes new first prev card
     const newFirstPrev = `      <a class="nl-prev-card" href="${esc(curUrl)}">
         <div class="nl-prev-card-top">
           <span class="nl-prev-title">${esc(curTheme)}</span>
@@ -353,7 +379,7 @@ function runLucy() {
         </div>
       </a>`).join('\n\n');
 
-    const newPrevSection = `<!-- ══ RIGHT: PREVIOUS EDITIONS ══ -->
+    const newPrevSection = `${mainEndMarker}
   <div class="nl-prev-col">
     <p class="nl-prev-header">Previous Editions</p>
     <div class="nl-prev-list">
@@ -365,7 +391,7 @@ ${remainingPrevHTML}
     </div>
   </div>
 
-</div><!-- /nl-main -->`;
+${prevEndMarker}`;
 
     // ── Build archive entry for oldest prev card ───────────────────────────────
     const oldDate  = oldestPrev.pubDate.trim() || '';
@@ -374,35 +400,28 @@ ${remainingPrevHTML}
     const oldHref  = oldestPrev.href;
     const oldDOW   = val('archive-dow');
 
-    // Derive YYYY-MM key from date string e.g. "July 7, 2026" → "2026-07"
     const _months = {January:'01',February:'02',March:'03',April:'04',May:'05',June:'06',
                      July:'07',August:'08',September:'09',October:'10',November:'11',December:'12'};
     const _dp = oldDate.match(/^(\w+)\s+\d+,\s+(\d{4})$/);
     const monthKey   = _dp ? `${_dp[2]}-${_months[_dp[1]] || '07'}` : '2026-07';
     const monthLabel = _dp ? `${_dp[1]} ${_dp[2]}` : 'July 2026';
 
-    // Archive entry matching exact ARCHIVE_DATA format
     const archiveEntry = `    { date:"${esc(oldDate)}", dow:"${esc(oldDOW)}", edition:"${esc(oldBadge)}", title:"${esc(oldTitle)}", href:"${esc(oldHref)}" },`;
 
     // ── Perform replacements ──────────────────────────────────────────────────
     let updated = newsletterHTML;
 
-    // 1. Replace featured + previous sections
-    const nlMainStart = updated.indexOf('<!-- ══ LEFT: LATEST EDITION ══ -->');
-    const nlMainEnd   = updated.indexOf('</div><!-- /nl-main -->') + '</div><!-- /nl-main -->'.length;
+    const nlMainStart = updated.indexOf(mainStartMarker);
+    const nlMainEnd   = updated.indexOf(prevEndMarker) + prevEndMarker.length;
     if (nlMainStart < 0 || nlMainEnd < 0) throw new Error('Could not find nl-main boundaries.');
     updated = updated.substring(0, nlMainStart) + newFeatured + newPrevSection + updated.substring(nlMainEnd);
 
-    // 2. Insert archive entry at top of correct YYYY-MM month entries array
-    // Matches: "2026-07": { label:"July 2026", entries:[
     const monthMarker = `"${monthKey}": {`;
     const mIdx = updated.indexOf(monthMarker);
     if (mIdx >= 0) {
-      // Find "entries:[" after the month marker and insert right after
       const entriesIdx = updated.indexOf('entries:[', mIdx) + 'entries:['.length;
       updated = updated.substring(0, entriesIdx) + '\n' + archiveEntry + updated.substring(entriesIdx);
     } else {
-      // Month key not found — prepend a new month block inside ARCHIVE_DATA
       const newMonthBlock = `  "${monthKey}": { label:"${monthLabel}", entries:[\n${archiveEntry}\n  ]},\n`;
       updated = updated.replace('const ARCHIVE_DATA = {', 'const ARCHIVE_DATA = {\n' + newMonthBlock);
     }
