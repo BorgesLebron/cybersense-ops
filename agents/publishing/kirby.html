@@ -255,21 +255,20 @@ CRITICAL INSTRUCTIONS:
 3. Do NOT include any preamble, explanation, or text outside the tags
 4. Keep each tag on its own line
 5. Do not skip any tags — if a field is missing, leave the tag empty
+6. For multi-paragraph fields (SA_BODY, DIG_BODY, TB_KNOW, TB_WHY): separate each paragraph with a blank line (double newline). Do not merge paragraphs into one block.
+7. For TB_ACT_SUBBULLETS3: if the Security Team action contains distinct named sub-actions (e.g. "Inventory and Patch:", "Hunt:", "Analyze:"), extract each as a pipe-separated line in the format LABEL|text. If no sub-bullets exist, leave the tag empty.
 
 <EDITION_TITLE>the thematic title of this edition</EDITION_TITLE>
 <OPEN_P1>first opening paragraph verbatim</OPEN_P1>
 <OPEN_P2>second opening paragraph verbatim</OPEN_P2>
 <SA_HEAD1>3-5 word headline for Situational Awareness entry 1</SA_HEAD1>
-<SA_FULL1>full article title for SA entry 1</SA_FULL1>
-<SA_BODY1>full body paragraph for SA entry 1</SA_BODY1>
+<SA_BODY1>all body paragraphs for SA entry 1, separated by blank lines</SA_BODY1>
 <SA_HEAD2>3-5 word headline for SA entry 2</SA_HEAD2>
-<SA_FULL2>full article title for SA entry 2</SA_FULL2>
-<SA_BODY2>full body paragraph for SA entry 2</SA_BODY2>
+<SA_BODY2>all body paragraphs for SA entry 2, separated by blank lines</SA_BODY2>
 <SA_HEAD3>3-5 word headline for SA entry 3</SA_HEAD3>
-<SA_FULL3>full article title for SA entry 3</SA_FULL3>
-<SA_BODY3>full body paragraph for SA entry 3</SA_BODY3>
+<SA_BODY3>all body paragraphs for SA entry 3, separated by blank lines</SA_BODY3>
 <TB_TOPIC>Training Byte topic line</TB_TOPIC>
-<TB_KNOW>What You Need to Know paragraph</TB_KNOW>
+<TB_KNOW>all What You Need to Know paragraphs, separated by blank lines</TB_KNOW>
 <TB_ACT_ROLE1>role for defensive action 1</TB_ACT_ROLE1>
 <TB_ACT_LABEL1>short label for defensive action 1</TB_ACT_LABEL1>
 <TB_ACT_TEXT1>full text of defensive action 1</TB_ACT_TEXT1>
@@ -278,25 +277,29 @@ CRITICAL INSTRUCTIONS:
 <TB_ACT_TEXT2>full text of defensive action 2</TB_ACT_TEXT2>
 <TB_ACT_ROLE3>role for defensive action 3</TB_ACT_ROLE3>
 <TB_ACT_LABEL3>short label for defensive action 3</TB_ACT_LABEL3>
-<TB_ACT_TEXT3>full text of defensive action 3</TB_ACT_TEXT3>
-<TB_WHY>Why This Matters paragraph</TB_WHY>
+<TB_ACT_TEXT3>summary text for defensive action 3 (used only if no sub-bullets)</TB_ACT_TEXT3>
+<TB_ACT_SUBBULLETS3>pipe-separated sub-bullets for action 3, format: LABEL|text — one per line. Leave empty if none.</TB_ACT_SUBBULLETS3>
+<TB_WHY>all Why This Matters paragraphs, separated by blank lines</TB_WHY>
 <TB_QUOTE>closing quote text only, no quotation marks</TB_QUOTE>
 <TB_ATTRIBUTION>quote attribution</TB_ATTRIBUTION>
 <TB_SOURCE>source name or publication</TB_SOURCE>
 <TB_YEAR>year of quote</TB_YEAR>
 <PG_TITLE>Professional Growth resource title</PG_TITLE>
 <PG_ORG>organization offering it</PG_ORG>
-<PG_FORMAT>format and cost descriptor</PG_FORMAT>
-<PG_BODY>relevance paragraph</PG_BODY>
+<PG_FORMAT>format type only (e.g. Live Webinar, Online Course, Free PDF)</PG_FORMAT>
+<PG_DATE>date of the event or resource if present, else leave empty</PG_DATE>
+<PG_TIME>time of the event if present, else leave empty</PG_TIME>
+<PG_BODY>relevance paragraph(s), separated by blank lines if multiple</PG_BODY>
 <DIG_HEAD1>3-5 word headline for DIG entry 1</DIG_HEAD1>
-<DIG_BODY1>full body paragraph for DIG entry 1</DIG_BODY1>
+<DIG_BODY1>all body paragraphs for DIG entry 1, separated by blank lines</DIG_BODY1>
 <DIG_HEAD2>3-5 word headline for DIG entry 2</DIG_HEAD2>
-<DIG_BODY2>full body paragraph for DIG entry 2</DIG_BODY2>
+<DIG_BODY2>all body paragraphs for DIG entry 2, separated by blank lines</DIG_BODY2>
 <FT_TITLE>Final Thought section title</FT_TITLE>
 <FT_P1>Final Thought paragraph 1</FT_P1>
 <FT_P2>Final Thought paragraph 2</FT_P2>
 <FT_P3>Final Thought paragraph 3 if present, else leave empty</FT_P3>
-<FT_CLOSE>single memorable closing line</FT_CLOSE>`
+<FT_P4>Final Thought paragraph 4 if present, else leave empty</FT_P4>
+<FT_CLOSE>single memorable closing line or closing paragraph</FT_CLOSE>`
 
 // ── State ─────────────────────────────────────────────────────────────────────
 let generatedHTML = '';
@@ -349,33 +352,47 @@ function updateFilename() {
 // ── Tagged-format parser (immune to quote/escape issues) ─────────────────────
 function parseTagged(raw) {
   function get(tag) {
-    // FIXED: Correctly escaped the regular expression backslashes to process dynamic text capture properly
     const m = raw.match(new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`));
     if (!m) return '';
-    // Strip any accidental "REPLACE WITH:" prefix if model echoed the instruction
     return m[1].trim().replace(/^REPLACE WITH:\s*/i, '');
   }
 
-  const ftParas = [get('FT_P1'), get('FT_P2'), get('FT_P3')].filter(Boolean);
+  // Split a multi-paragraph field on blank lines into an array of non-empty strings
+  function getParas(tag) {
+    return get(tag).split(/\n\s*\n/).map(p => p.trim()).filter(Boolean);
+  }
+
+  // Parse pipe-delimited sub-bullets: "LABEL|text" per line
+  function getSubBullets(tag) {
+    const raw_val = get(tag);
+    if (!raw_val) return [];
+    return raw_val.split('\n').map(line => {
+      const idx = line.indexOf('|');
+      if (idx === -1) return { label: '', text: line.trim() };
+      return { label: line.slice(0, idx).trim(), text: line.slice(idx + 1).trim() };
+    }).filter(b => b.text);
+  }
+
+  const ftParas = [get('FT_P1'), get('FT_P2'), get('FT_P3'), get('FT_P4')].filter(Boolean);
 
   return {
     editionTitle: get('EDITION_TITLE'),
     openingPara1: get('OPEN_P1'),
     openingPara2: get('OPEN_P2'),
     situationalAwareness: [
-      { headline: get('SA_HEAD1'), fullArticleTitle: get('SA_FULL1'), body: get('SA_BODY1') },
-      { headline: get('SA_HEAD2'), fullArticleTitle: get('SA_FULL2'), body: get('SA_BODY2') },
-      { headline: get('SA_HEAD3'), fullArticleTitle: get('SA_FULL3'), body: get('SA_BODY3') }
-    ].filter(s => s.body),
+      { headline: get('SA_HEAD1'), paragraphs: getParas('SA_BODY1') },
+      { headline: get('SA_HEAD2'), paragraphs: getParas('SA_BODY2') },
+      { headline: get('SA_HEAD3'), paragraphs: getParas('SA_BODY3') }
+    ].filter(s => s.paragraphs.length),
     trainingByte: {
-      topic:         get('TB_TOPIC'),
-      whatYouNeedToKnow: get('TB_KNOW'),
+      topic:             get('TB_TOPIC'),
+      whatYouNeedToKnow: getParas('TB_KNOW'),
       defensiveActions: [
-        { role: get('TB_ACT_ROLE1') || 'Individual',     label: get('TB_ACT_LABEL1'), action: get('TB_ACT_TEXT1') },
-        { role: get('TB_ACT_ROLE2') || 'Team Lead',      label: get('TB_ACT_LABEL2'), action: get('TB_ACT_TEXT2') },
-        { role: get('TB_ACT_ROLE3') || 'Security Team',  label: get('TB_ACT_LABEL3'), action: get('TB_ACT_TEXT3') }
-      ].filter(a => a.action),
-      whyThisMatters:  get('TB_WHY'),
+        { role: get('TB_ACT_ROLE1') || 'Individual',    label: get('TB_ACT_LABEL1'), action: get('TB_ACT_TEXT1'), subBullets: [] },
+        { role: get('TB_ACT_ROLE2') || 'Team Lead',     label: get('TB_ACT_LABEL2'), action: get('TB_ACT_TEXT2'), subBullets: [] },
+        { role: get('TB_ACT_ROLE3') || 'Security Team', label: get('TB_ACT_LABEL3'), action: get('TB_ACT_TEXT3'), subBullets: getSubBullets('TB_ACT_SUBBULLETS3') }
+      ].filter(a => a.action || a.subBullets.length),
+      whyThisMatters:  getParas('TB_WHY'),
       closingQuote:    get('TB_QUOTE'),
       quoteAttribution:get('TB_ATTRIBUTION'),
       quoteSource:     get('TB_SOURCE'),
@@ -385,12 +402,14 @@ function parseTagged(raw) {
       title:        get('PG_TITLE'),
       organization: get('PG_ORG'),
       format:       get('PG_FORMAT'),
-      body:         get('PG_BODY')
+      date:         get('PG_DATE'),
+      time:         get('PG_TIME'),
+      body:         getParas('PG_BODY')
     },
     dig: [
-      { headline: get('DIG_HEAD1'), body: get('DIG_BODY1') },
-      { headline: get('DIG_HEAD2'), body: get('DIG_BODY2') }
-    ].filter(s => s.body),
+      { headline: get('DIG_HEAD1'), paragraphs: getParas('DIG_BODY1') },
+      { headline: get('DIG_HEAD2'), paragraphs: getParas('DIG_BODY2') }
+    ].filter(s => s.paragraphs.length),
     finalThought: {
       title:      get('FT_TITLE'),
       paragraphs: ftParas,
@@ -457,26 +476,54 @@ function buildNewsletterHTML(d) {
 
   // SA entries (3)
   const saLinks = [links.sa1, links.sa2, links.sa3];
-  const saHTML = (d.situationalAwareness||[]).slice(0,3).map((s,i) => `
+  const saHTML = (d.situationalAwareness||[]).slice(0,3).map((s,i) => {
+    const parasHTML = (s.paragraphs||[]).map(p =>
+      `<p class="text-gray-800 mb-2 text-sm">${esc(p)}</p>`
+    ).join('\n        ');
+    return `
       <h3 class="text-xl font-semibold mb-1"><strong>${esc(s.headline)}</strong></h3>
-        <p class="text-gray-800 mb-3 text-sm">${esc(s.body)}</p>
-        <p class="text-cyan-400 mb-3 text-xs"><strong>Full Article: </strong><a href="${esc(saLinks[i])}" target="_blank" rel="noopener" style="color:#38bdf8;">${esc(s.fullArticleTitle)} ↗</a></p>
-      ${i < 2 ? '<hr class="my-6 border-white/10">' : ''}`
-  ).join('');
+        ${parasHTML}
+        <p class="text-cyan-400 mt-4 italic text-xs font-['Georgia']"><a href="${esc(saLinks[i])}" target="_blank" rel="noopener" style="color:#38bdf8;">Read Full Article ↗</a></p>
+      ${i < 2 ? '<hr class="my-6 border-white/10">' : ''}`;
+  }).join('');
 
-  // Defensive actions
-  const defActHTML = (d.trainingByte?.defensiveActions||[]).map(a =>
-    `<li><strong>${esc(a.label)}: ${esc(a.role)}</strong>: ${esc(a.action)}</li>`
-  ).join('\n        ');
+  // What You Need to Know (multi-paragraph)
+  const tbKnowHTML = (d.trainingByte?.whatYouNeedToKnow||[]).map(p =>
+    `<p class="text-gray-800 mb-2 text-sm">${esc(p)}</p>`
+  ).join('\n      ');
+
+  // Why This Matters (multi-paragraph)
+  const tbWhyHTML = (d.trainingByte?.whyThisMatters||[]).map(p =>
+    `<p class="text-gray-800 mb-2 text-sm">${esc(p)}</p>`
+  ).join('\n      ');
+
+  // Defensive actions with nested sub-bullets for Security Team
+  const defActHTML = (d.trainingByte?.defensiveActions||[]).map(a => {
+    if (a.subBullets && a.subBullets.length) {
+      const subHTML = a.subBullets.map(b =>
+        `<li><strong>${esc(b.label)}:</strong> ${esc(b.text)}</li>`
+      ).join('\n            ');
+      return `<li><strong>${esc(a.role)}</strong>:
+          <ul class="list-[circle] list-inside space-y-1 text-gray-800 ml-5 mb-2 text-sm">
+            ${subHTML}
+          </ul>
+        </li>`;
+    }
+    return `<li><strong>${esc(a.role)}</strong>: ${esc(a.action)}</li>`;
+  }).join('\n        ');
 
   // DIG entries
   const digLinks = [links.dig1, links.dig2];
-  const digHTML = (d.dig||[]).slice(0,2).map((s,i) => `
+  const digHTML = (d.dig||[]).slice(0,2).map((s,i) => {
+    const parasHTML = (s.paragraphs||[]).map(p =>
+      `<p class="text-gray-800 mb-3 text-sm">${esc(p)}</p>`
+    ).join('\n        ');
+    return `
       <h3 class="text-xl font-semibold mb-1"><strong>${esc(s.headline)}</strong></h3>
-        <p class="text-gray-800 mb-3 text-sm">${esc(s.body)}</p>
-        <p class="text-cyan-400 mb-3 text-xs"><strong>Full Article: </strong><a href="${esc(digLinks[i])}" target="_blank" rel="noopener" style="color:#38bdf8;">Read Full Article ↗</a></p>
-      ${i < 1 ? '<hr class="my-6 border-white/10">' : ''}`
-  ).join('');
+        ${parasHTML}
+        <p class="text-cyan-400 mt-4 italic text-xs font-['Georgia']"><a href="${esc(digLinks[i])}" target="_blank" rel="noopener" style="color:#38bdf8;">Read Full Article ↗</a></p>
+      ${i < 1 ? '<hr class="my-6 border-white/10">' : ''}`;
+  }).join('');
 
   // Final thought paragraphs
   const ftParas = (d.finalThought?.paragraphs||[]).map(p =>
@@ -576,16 +623,16 @@ function buildNewsletterHTML(d) {
       <h2 class="text-3xl font-bold mb-4 flex items-center border-b pb-2">Training Byte</h2>
       <h4 class="text-base font-semibold mt-1 mb-3" style="color:#66B2FF;">${esc(tb.topic||'')}</h4>
 
-      <h4 class="text-base font-semibold mt-5 mb-1">What You Need to Know</h4>
-      <p class="text-gray-800 mb-3 text-sm">${esc(tb.whatYouNeedToKnow||'')}</p>
+      <h4 class="text-base font-semibold mt-5 mb-1" style="color:#a5d1fe;">What You Need to Know</h4>
+      ${tbKnowHTML}
 
-      <h4 class="text-base font-semibold mt-5 mb-1">Defensive Actions</h4>
+      <h4 class="text-base font-semibold mt-4 mb-1" style="color:#a5d1fe;">Defensive Actions</h4>
       <ul class="list-disc list-inside space-y-1 text-gray-800 mb-3 text-sm">
         ${defActHTML}
       </ul>
 
-      <h4 class="text-base font-semibold mt-5 mb-1">Why This Matters</h4>
-      <p class="text-gray-800 mb-3 text-sm">${esc(tb.whyThisMatters||'')}</p>
+      <h4 class="text-base font-semibold mt-4 mb-1" style="color:#a5d1fe;">Why This Matters</h4>
+      ${tbWhyHTML}
 
       <p class="text-cyan-400 italic mt-4 text-xs border-l-2 border-cyan-500 pl-2">
         "${esc(tb.closingQuote||'')}"
@@ -600,10 +647,12 @@ function buildNewsletterHTML(d) {
     <div class="section-card p-6 rounded-xl border">
       <h2 class="text-3xl font-bold mb-4 flex items-center border-b pb-2">Professional Growth</h2>
       <h4 class="text-base font-semibold mt-1 mb-3" style="color:#66B2FF;">${esc(pg.title||'')}</h4>
-      <p class="text-gray-800 mb-3 text-sm"><strong>Organization</strong>: ${esc(pg.organization||'')}</p>
-      <p class="text-gray-800 mb-3 text-sm"><strong>Format</strong>: ${esc(pg.format||'')}</p>
-      <p class="text-gray-800 mb-3 text-sm">${esc(pg.body||'')}</p>
-      <p class="text-gray-800 mb-3 text-sm"><a href="${esc(links.pg)}" target="_blank" rel="noopener" style="color:#38bdf8;">Get Started ↗</a></p>
+      ${pg.organization ? `<p class="text-gray-800 mb-2 text-sm"><strong>Organization</strong>: ${esc(pg.organization)}</p>` : ''}
+      ${pg.format      ? `<p class="text-gray-800 mb-2 text-sm"><strong>Format</strong>: ${esc(pg.format)}</p>` : ''}
+      ${pg.date        ? `<p class="text-gray-800 mb-2 text-sm"><strong>Date</strong>: ${esc(pg.date)}</p>` : ''}
+      ${pg.time        ? `<p class="text-gray-800 mb-4 text-sm"><strong>Time</strong>: ${esc(pg.time)}</p>` : ''}
+      ${(pg.body||[]).map(p => `<p class="text-gray-800 mb-4 text-sm">${esc(p)}</p>`).join('\n      ')}
+      <p class="text-cyan-400 mb-8 italic text-xs font-['Georgia']"><a href="${esc(links.pg)}" target="_blank" rel="noopener" style="color:#38bdf8;">Register Here ↗</a></p>
     </div>
   </div>
 
@@ -618,7 +667,7 @@ function buildNewsletterHTML(d) {
     <div class="section-card p-6 rounded-xl border w-full">
       <h2 class="text-3xl font-bold mb-4 flex items-center border-b pb-2">Final Thought: ${esc(ft.title||'')}</h2>
       ${ftParas}
-      <p class="text-cyan-400 italic mt-6 text-sm border-l-2 border-cyan-500 pl-3">${esc(ft.closingLine||'')}</p>
+      <p class="text-cyan-400 italic mt-6 text-sm pl-3 font-['Georgia']">${esc(ft.closingLine||'')}</p>
     </div>
   </div>
 
