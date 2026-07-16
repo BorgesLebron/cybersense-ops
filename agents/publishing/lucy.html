@@ -421,11 +421,41 @@ function runLucy() {
       </a>`).join('\n\n');
 
     // ── Perform Clean DOM Segment Swaps ───────────────────────────────────────
+    // Strategy: replace ONLY the inner <div class="nl-featured">…</div> content,
+    // leaving nl-featured-col, nl-section-title, nl-section-subtitle, and all
+    // wrapper divs completely untouched. Same principle for nl-prev-list.
     let updated = newsletterHTML;
 
-    // Isolate the layout zones cleanly to bypass any broken tracking markers in the original file
-    updated = updated.replace(/<div\s+[^>]*class="[^"]*nl-featured[^"]*"[^>]*>[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/i, newFeaturedHTML + '\n  </div>');
-    updated = updated.replace(/<div\s+[^>]*class="[^"]*nl-prev-col[^"]*"[^>]*>[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/i, `<div class="nl-prev-col">\n    <h2 class="nl-section-title">Previous Editions</h2>\n    <span class="nl-section-subtitle"><strong>Missed a briefing?</strong> Catch up on recent threat telemetry, market shifts, and development insights from the past few days.</span>\n      <div class="nl-prev-list">\n\n${newFirstPrev}\n\n${remainingPrevHTML}\n\n    </div>\n  </div>`);
+    // ── Swap 1: Replace only the inner nl-featured card ──────────────────────
+    // Balanced-div walk: finds the exact closing </div> for nl-featured only,
+    // leaving nl-featured-col, nl-section-title, and nl-section-subtitle intact.
+    const featStart = updated.indexOf('<div class="nl-featured">');
+    if (featStart === -1) throw new Error('Could not locate <div class="nl-featured"> in newsletter.html.');
+    let fdepth = 0, fi = featStart, featEnd = -1;
+    while (fi < updated.length) {
+      if (updated.substring(fi, fi+4) === '<div') fdepth++;
+      else if (updated.substring(fi, fi+6) === '</div>') { fdepth--; if (fdepth === 0) { featEnd = fi + 6; break; } }
+      fi++;
+    }
+    if (featEnd === -1) throw new Error('Could not find balanced closing </div> for nl-featured block.');
+    updated = updated.substring(0, featStart) + newFeaturedHTML + '\n  ' + updated.substring(featEnd);
+
+    // ── Swap 2: Replace only the inner nl-prev-list content ──────────────────
+    // Replaces everything between <div class="nl-prev-list"> and its own </div>,
+    // leaving nl-prev-col, nl-section-title, nl-section-subtitle all intact.
+    const prevListStart = updated.indexOf('<div class="nl-prev-list">');
+    if (prevListStart === -1) throw new Error('Could not find <div class="nl-prev-list"> in newsletter.html.');
+    const prevListOpen = prevListStart + '<div class="nl-prev-list">'.length;
+    // Find matching </div> for nl-prev-list
+    let pdepth = 1, pi = prevListOpen, prevListEnd = -1;
+    while (pi < updated.length) {
+      if (updated.substring(pi,pi+4) === '<div') pdepth++;
+      else if (updated.substring(pi,pi+6) === '</div>') { pdepth--; if(pdepth===0){prevListEnd=pi;break;} }
+      pi++;
+    }
+    if (prevListEnd === -1) throw new Error('Could not find closing </div> for nl-prev-list block.');
+    const newPrevListContent = `\n\n${newFirstPrev}\n\n${remainingPrevHTML}\n\n    `;
+    updated = updated.substring(0, prevListOpen) + newPrevListContent + updated.substring(prevListEnd);
 
     // ── Build Archive Array Append ────────────────────────────────────────────
     const oldDate  = oldestPrev.pubDate.trim() || '';
